@@ -1,0 +1,52 @@
+:::: columns
+::: {.column width="50%"}
+
+:::
+
+::: {.column width="50%"}
+
+:::
+::::
+
+
+
+
+
+
+:::: columns
+::: {.column width="50%"}
+```{r}
+#| eval: false
+#| fig.asp: 1
+
+```
+:::
+
+::: {.column width="50%"}
+```{r}
+#| echo: false
+#| fig.asp: 1
+
+
+
+```
+:::
+::::
+
+
+
+
+::: callout-note
+## `r emo::ji("weight_lifting_man")` Exercise XYZ
+
+:::
+
+::: {.callout-caution collapse="true"}
+## `r emo::ji("bulb")` Tip
+
+:::
+
+::: {.callout-tip collapse="true"}
+## `r emo::ji("white_check_mark")` Solution XYZ
+
+:::
