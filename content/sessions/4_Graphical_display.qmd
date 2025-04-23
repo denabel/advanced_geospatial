@@ -432,7 +432,7 @@ Let's explore the suitability of `ggplot2` in combination with `tidyterra` with 
 
 ```{r}
 # Example with worldpop data for Germany 2020
-ger_pop_2020 <- terra::rast("../../data/deu_ppp_2020.tif")
+ger_pop_2020 <- terra::rast("../../data/deu_ppp_2020_1km_Aggregated.tif")
 
 ger_pop_2020
 ```
@@ -599,7 +599,7 @@ ggplot()+
 We will now dig deeper into population dynamics. We load a second layer which records the population size twenty years earlier - in 2000. We compare dimensions of both layers - they match.
 
 ```{r}
-ger_pop_2000 <- terra::rast("../../data/deu_ppp_2000.tif") |> 
+ger_pop_2000 <- terra::rast("../../data/deu_ppp_2000_1km_Aggregated.tif") |> 
   terra::project("EPSG:25832")
   
 ger_pop_2000
@@ -849,7 +849,7 @@ NRW_districts <- NRW_pop_diff |>
   bind_cols(NRW_districts, .)
 
 extremes <- NRW_districts |> 
-  arrange(desc(deu_ppp_2020)) |> 
+  arrange(desc(deu_ppp_2020_1km_Aggregated)) |> 
   slice(c(1, n()))
 ```
 
