@@ -1,0 +1,204 @@
+---
+title: "Exercise 4_1: Simple Map"
+subtitle: 'Advanced Geospatial Data Processing for Social Scientists'
+author: Dennis Abel & Stefan Jünger
+format: 
+  html:
+    embed-resources: true
+    code-copy: true
+execute:
+  echo: true
+editor: visual
+callout-icon: false
+callout-appearance: minimal
+---
+
+### Exercises
+
+We are now focussing on creating a first map based on raster data in `ggplot`. We will work with population data in the US.
+
+::: callout-note
+## `r emo::ji("weight_lifting_man")` Exercise 1
+
+Load the WorldPop file for the USA in 2020 (`./data/usa_ppp_2020_1km_Aggregated.tif`). Create a simple plot with `terra::plot()` to inspect the data.
+:::
+
+::: callout-note
+## `r emo::ji("weight_lifting_man")` Exercise 2
+
+We want to focus on the 48 contiguous States and exclude Alaska, Hawaii as well as overseas territories. To do that, please:
+
+-   load a US States shapefile with the [tigris](https://github.com/walkerke/tigris) package,
+-   filter it to the 48 contiguous states,
+-   and plot the shapefile to cross-check your progress.
+:::
+
+::: {.callout-caution collapse="true"}
+## `r emo::ji("bulb")` Tip
+
+We haven't worked with `tigris` before. Below you find the code to load and select the relevant US states.
+
+```{r}
+#| eval: false
+# install.packages("tigris")
+library(tigris)
+
+US_states <- states() |> 
+  dplyr::filter(!STUSPS %in% c("AK", "AS", "GU", "HI", "MP", "PR", "VI"))
+```
+:::
+
+::: callout-note
+## `r emo::ji("weight_lifting_man")` Exercise 3
+
+We now want to crop the raster-file on the basis of the US states bounding box: - Create a bounding box based on your shapefile, - Reproject this bbox to the CRS of the raster file, - Then crop the raster file on based on the bbox.
+:::
+
+::: {.callout-caution collapse="true"}
+## `r emo::ji("bulb")` Tip
+
+You will need three `sf`-commands to prepare your bbox: `st_bbox()` to create the bbox, `st_as_sfc()` to transform it into an `sf`-object and `st_transform()` to reproject it to the CRS of your raster file. The code below shows the entire pipe for these steps.
+
+```{r}
+#| eval: false
+bbox <- sf::st_bbox(US_states) |> 
+  sf::st_as_sfc() |> 
+  sf::st_transform(crs = terra::crs(USA_pop_2020))
+```
+:::
+
+::: callout-note
+## `r emo::ji("weight_lifting_man")` Exercise 4
+
+Inspect the attributes of your raster file. The CRS is currently in WGS84. Is that suitable for a plot of the US territory? Alternatively, "NAD83 / Conus Albers" is often used for data analysis and presentation of the 48 contiguous US states. It is an equal-area projection and minimizes distortion across the US territory.
+
+-   Search for the EPSG of "NAD83 / Conus Albers" on <https://spatialreference.org/ref/>,
+-   Reproject the map and your shapefile accordingly.
+:::
+
+::: callout-note
+## `r emo::ji("weight_lifting_man")` Exercise 5
+
+Now we can plot the population data together with the shapefile for the US states. Adjust color schemes accordingly and add labels.
+:::
+
+::: {.callout-caution collapse="true"}
+## `r emo::ji("bulb")` Tip
+
+Unfortunately, our data is right-skewed and contains a few outliers with high population numbers per grid cell. This is a challenge for our color-coding. When working with `scale_fill_distiller` or `scale_fill_viridis_c` to adjust your color scheme, you could utilize the arguments `limits` and `oob = scales::squish` to account for that.
+
+```{r}
+#| eval: false
+ggplot()+
+  ... +
+  scale_fill_distiller(...,
+                       limits = c(0, 1000), 
+                       oob = scales::squish
+                       ) +
+  ...
+```
+:::
+
+### Solutions
+
+::: {.callout-tip collapse="true"}
+## `r emo::ji("white_check_mark")` Solution 1
+
+```{r}
+#| eval: false
+# load libraries
+library(dplyr)
+library(sf)
+library(ggplot2)
+library(terra)
+library(tidyterra)
+
+# Load the data
+USA_pop_2020 <- terra::rast("./data/usa_ppp_2020_1km_Aggregated.tif")
+
+# Inspect it
+terra::plot(USA_pop_2020)
+
+```
+
+```{r}
+#| echo: false
+# load libraries
+library(dplyr)
+library(sf)
+library(ggplot2)
+library(terra)
+library(tidyterra)
+
+# Load the data
+USA_pop_2020 <- terra::rast("../../data/usa_ppp_2020_1km_Aggregated.tif")
+
+# Inspect it
+terra::plot(USA_pop_2020)
+
+```
+:::
+
+::: {.callout-tip collapse="true"}
+## `r emo::ji("white_check_mark")` Solution 2
+
+```{r}
+# install.packages("tigris")
+library(tigris)
+
+# Load the states and filter out non-contiguous territories
+US_states <- states() |> 
+  dplyr::filter(!STUSPS %in% c("AK", "AS", "GU", "HI", "MP", "PR", "VI"))
+
+plot(sf::st_geometry(US_states))
+```
+:::
+
+::: {.callout-tip collapse="true"}
+## `r emo::ji("white_check_mark")` Solution 3
+
+```{r}
+bbox <- sf::st_bbox(US_states) |> 
+  sf::st_as_sfc() |> 
+  sf::st_transform(crs = terra::crs(USA_pop_2020))
+
+USA_pop_2020 <- terra::crop(
+  USA_pop_2020,
+  bbox
+)
+```
+:::
+
+::: {.callout-tip collapse="true"}
+## `r emo::ji("white_check_mark")` Solution 4
+
+```{r}
+USA_pop_2020 <- terra::project(USA_pop_2020, "EPSG:5070")
+US_states <- sf::st_transform(US_states, crs = "EPSG:5070")
+```
+:::
+
+::: {.callout-tip collapse="true"}
+## `r emo::ji("white_check_mark")` Solution 5
+
+```{r}
+ggplot()+
+  tidyterra::geom_spatraster(data = USA_pop_2020)+
+  geom_sf(data = US_states,
+          fill = "transparent",
+          color = "black",
+          size = 5) +
+  scale_fill_distiller(type = "seq", 
+                       palette = "PuRd", 
+                       direction = 1,
+                       na.value = "transparent",
+                       limits = c(0, 1000), 
+                       oob = scales::squish
+                       ) +
+  labs(
+    fill = "Population\ncount",
+    title = "Estimated population of the USA in 2020",
+    subtitle = "Approx. 1x1km grid"
+  )
+```
+:::

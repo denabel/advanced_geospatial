@@ -1,0 +1,266 @@
+---
+title: "Exercise 4_2: Fancy Map"
+subtitle: 'Advanced Geospatial Data Processing for Social Scientists'
+author: Dennis Abel & Stefan Jünger
+format: 
+  html:
+    embed-resources: true
+    code-copy: true
+execute:
+  echo: true
+editor: visual
+callout-icon: false
+callout-appearance: minimal
+---
+
+### Exercises
+
+We want to create a second graph which zooms into Texas and visualizes population dynamics between 2000 and 2020.
+
+::: callout-note
+## `r emo::ji("weight_lifting_man")` Exercise 1
+
+We need the two raster layers for Texas in 2000 and 2020 (`./data/usa_ppp_2000_1km_Aggregated.tif` and `./data/usa_ppp_2020_1km_Aggregated.tif`). We also need county shapefiles for Texas, which can be downloaded with the `tigris` package (`tigris::counties("TX")`). After loading the three objects, create a simple plot of the counties shapefile.
+:::
+
+
+::: callout-note
+## `r emo::ji("weight_lifting_man")` Exercise 2
+
+In order to study population dynamics in Texas, we will calculate simple differences between 2000 and 2020 for each grid cell based on our two raster layers for Texas. Store the result in a new raster file and visualize a simple plot of it. Texas is one of the US states with the highest population increase in the last decades - this should be reflected in the map.
+:::
+
+
+::: callout-note
+## `r emo::ji("weight_lifting_man")` Exercise 3
+
+Like before, we want our raster and vector data to have matching CRS. "NAD83 / Texas Centric Mapping System Albers Equal Area" is specifically projected for Texas.
+
+-   Search for the EPSG of "NAD83 / Texas Centric Mapping System Albers Equal Area" on <https://spatialreference.org/ref/>,
+-   Reproject the raster file which stores the population changes and your counties shapefile accordingly.
+:::
+
+
+::: callout-note
+## `r emo::ji("weight_lifting_man")` Exercise 4
+
+Let's create a first plot with `ggplot`which contains the shapefile and raster file. Adjust the color scheme by utilizing `scale_fill_viridis_c`, `scale_fill_distiller`, or `scale_fill_gradient2`. 
+:::
+
+
+::: callout-note
+## `r emo::ji("weight_lifting_man")` Exercise 5
+
+We also want to attach labels to the top three counties by population growth. You can utilize `slice_head(n = 3)` after ordering the data in descending order to select only those three observations. Add this as an additional layer to the plot as text or text labels.
+:::
+
+
+::: callout-note
+## `r emo::ji("weight_lifting_man")` Exercise 6
+
+Polish your visualization. You could:
+- Turn NAs transparent,
+- Add titles,
+- Adjust the overall theme of the plot,
+- Add North arrow and scale bar.
+:::
+
+### Solutions
+
+::: {.callout-tip collapse="true"}
+## `r emo::ji("white_check_mark")` Solution 1
+
+```{r}
+#| eval: false
+library(dplyr)
+library(sf)
+library(ggplot2)
+library(terra)
+library(tidyterra)
+library(tigris)
+
+# Load the raster data
+TX_pop_2020 <- terra::rast("./data/US-TX_ppp_2020_1km.tif")
+TX_pop_2000 <- terra::rast("./data/US-TX_ppp_2000_1km.tif")
+
+# Load Texas county data
+TX_counties <- tigris::counties("TX")
+
+plot(st_geometry(TX_counties))
+
+```
+
+```{r}
+#| echo: false
+library(dplyr)
+library(sf)
+library(ggplot2)
+library(terra)
+library(tidyterra)
+library(tigris)
+
+# Load the raster data
+TX_pop_2020 <- terra::rast("../../data/US-TX_ppp_2020_1km.tif")
+TX_pop_2000 <- terra::rast("../../data/US-TX_ppp_2000_1km.tif")
+
+# Load Texas county data
+TX_counties <- tigris::counties("TX")
+
+plot(st_geometry(TX_counties))
+
+```
+:::
+
+
+::: {.callout-tip collapse="true"}
+## `r emo::ji("white_check_mark")` Solution 2
+
+```{r}
+# Let's calculate the deviation
+TX_pop_diff <- TX_pop_2020 - TX_pop_2000
+
+TX_pop_diff
+
+terra::plot(TX_pop_diff)
+```
+:::
+
+
+::: {.callout-tip collapse="true"}
+## `r emo::ji("white_check_mark")` Solution 3
+
+```{r}
+TX_pop_diff <- terra::project(TX_pop_diff, "EPSG:3081")
+TX_counties <- sf::st_transform(TX_counties, crs = "EPSG:3081")
+```
+:::
+
+
+::: {.callout-tip collapse="true"}
+## `r emo::ji("white_check_mark")` Solution 4
+
+```{r}
+# Let's adjust color palette to account for diverging values
+ggplot()+
+  geom_spatraster(data = TX_pop_diff)+
+  geom_sf(data = TX_counties,
+          fill = "transparent",
+          color = "white",
+          size = 3)+
+  scale_fill_viridis_c(option = "magma")
+
+# Identify max and min to adjust for skewness of positive and negative values
+max_val <- max(abs(minmax(TX_pop_diff)))
+
+ggplot()+
+  geom_spatraster(data = TX_pop_diff)+
+  geom_sf(data = TX_counties,
+          fill = "transparent",
+          color = "black",
+          size = 3)+
+  scale_fill_distiller(type = "div", palette = "PuOr", limits = c(-max_val, max_val))
+
+# Or define manually for even greater control
+ggplot()+
+  geom_spatraster(data = TX_pop_diff)+
+  geom_sf(data = TX_counties,
+          fill = "transparent",
+          color = "black",
+          size = 3)+
+  scale_fill_gradient2(
+    low = "#7f3b08",
+    mid = "white",
+    high = "#40004b",
+    midpoint = 0
+  )
+```
+:::
+
+
+::: {.callout-tip collapse="true"}
+## `r emo::ji("white_check_mark")` Solution 5
+
+```{r}
+# Identify growing and shrinking counties
+TX_counties <- TX_pop_diff |> 
+  extract(TX_counties, fun = mean, na.rm =TRUE) |> 
+  as_tibble() %>% 
+  bind_cols(TX_counties, .)
+
+# Select top three counties by population growth
+extremes <- TX_counties |> 
+  arrange(desc(`US-TX_ppp_2020_1km`)) |> 
+  slice_head(n=3)
+
+# Add geom_sf_text layer to the plot 
+ggplot()+
+  geom_spatraster(data = TX_pop_diff)+
+  geom_sf(data = TX_counties,
+          fill = "transparent",
+          color = "black",
+          size = 3)+
+  geom_sf_text(data = extremes, aes(label = NAMELSAD), size = 4, color = "black")+ 
+  scale_fill_gradient2(
+    low = "#7f3b08",
+    mid = "white",
+    high = "#40004b",
+    midpoint = 0
+  )
+```
+:::
+
+
+::: {.callout-tip collapse="true"}
+## `r emo::ji("white_check_mark")` Solution 6
+
+```{r}
+# Final polishing
+library(ggspatial)
+library(ggrepel)
+
+ggplot()+
+  geom_spatraster(data = TX_pop_diff)+
+  geom_sf(data = TX_counties,
+          fill = "transparent",
+          color = "black",
+          size = 3)+
+  geom_label_repel(
+    data = extremes, 
+    aes(geometry = geometry, label = NAMELSAD), 
+    stat = "sf_coordinates",
+    min.segment.length = 0, 
+    segment.color = "black",   
+    segment.size = 0.5,        
+    size = 4,                  
+    fill = "white",            
+    color = "black",           
+    label.size = 0.2           
+  )+ 
+  scale_fill_gradient2(
+    low = "#7f3b08",
+    mid = "white",
+    high = "#40004b",
+    midpoint = 0,
+    na.value = "transparent",
+    name = "Population\nChange"
+  )+
+  theme_grey()+
+  theme(
+    axis.title = element_blank()
+  ) +
+  labs(
+    title = "Population change in Texas counties (2000–2020)",
+    subtitle = "In absolute numbers on 1x1km grid\nText labels identify top three districts",
+    caption = "Source: WorldPop (2018)"
+  ) +
+  annotation_scale(
+    location = "br",
+    width_hint = 0.3
+  ) +
+  annotation_north_arrow(
+    location = "tr",
+    which_north = "true",
+    style = north_arrow_fancy_orienteering
+  )
+```
+:::
