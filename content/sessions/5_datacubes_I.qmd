@@ -1,0 +1,755 @@
+---
+title: "Datacube processing I"
+subtitle: "Advanced Geospatial Data Processing for Social Scientists"
+author: "Dennis Abel & Stefan Jünger"
+date: April 29, 2025
+execute:
+  echo: true
+format:
+  revealjs:
+    embed-resources: true
+    theme: [simple, tweaks.css]
+    smaller: true
+    scrollable: true
+    slide-number: "c/t"
+    logo: ../img/GESIS-Logo_2024.svg.png
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r}
+#| include: false
+library(dplyr)
+library(stars)
+library(terra)
+library(sf)
+library(ggplot2)
+library(units)
+library(emo)
+```
+
+## Now
+
+```{r}
+#| echo: false
+source("course_content.R") 
+
+course_content |> 
+  kableExtra::row_spec(8, background = "yellow")
+```
+
+
+## Datacubes
+
+Yesterday, we worked with single layers of raster data. Today, we turn towards the more complex raster stacks or datacubes. Essentially we add one or more dimension(s) to our data object. This increases complexity - for humans and machines. 
+
+Our goal for today is to:
+
+- Understand the logic of raster stacks and datacubes
+- Be able to stack multiple raster layers into a coherent raster stack or datacube
+- Be able to navigate and process the spatial and temporal dimensions
+- Familiarize ourselves with the `stars` and `terra` packages for raster processing
+
+
+## Datacubes
+
+![](../img/cube2.png){fig-align="center" width="75%"}
+
+[Source](https://raw.githubusercontent.com/r-spatial/stars/master/images/cube2.png)
+
+
+## Most important EOD packages `r emo::ji("package")`
+
+If you want to do anything in `R`, you need to use functions, and functions are provided through packages.
+
+:::: columns
+::: {.column width="80%"}
+[`terra`](https://rspatial.github.io/terra/index.html) (and its predecessor `raster`) by Robert Hijmans is probably the most commonly used package for raster data in `R` (and equally relevant for vector data).
+
+Methods for vector data include geometric operations such as intersect and buffer. Raster methods include local, focal, global, zonal and geometric operations. The predict and interpolate methods facilitate the use of regression type (interpolation, machine learning) models for spatial prediction, including with satellite remote sensing data.
+
+The authors have produced a very extensive [tutorial](https://rspatial.org/) which is basically a textbook for spatial data science in R.
+:::
+
+::: {.column width="20%"}
+![](../img/terra_logo.png){fig-align="center" width="80%"}
+:::
+::::
+
+## Most important EOD packages `r emo::ji("package")`
+
+If you want to do anything in `R`, you need to use functions, and functions are provided through packages.
+
+:::: columns
+::: {.column width="30%"}
+![](../img/sf.jpg){fig-align="center" width="100%"}
+
+Source: [Allison Horst (2018)](https://allisonhorst.com/allison-horst)
+:::
+
+::: {.column width="70%"}
+[`stars`](https://r-spatial.github.io/stars/index.html) by Edzer Pebesma is equally useful when handling spatiotemporal arrays (datacubes). 
+
+This R package provides classes and methods for reading, manipulating, plotting and writing such data cubes, to the extent that there are proper formats for doing so.
+
+The `stars` syntax follows the logic of the [`sf`](https://r-spatial.github.io/sf/)-package (also by Edzer Pebesma) and together they can be seen as the emergence of a "spatial tidyverse".
+
+Edzer Pebesma's and Roger Bivand's [Spatial Data Science](https://r-spatial.org/book/) textbook is THE go-to resource for learning the `sf` and `stars` syntax.
+:::
+::::
+
+
+## Similarities and differences between `terra` and `stars`
+
+- With `terra`, we create three-dimensional stacks of raster layers, were the third dimension is often (not always) time - in contrast, `stars` objects can be multi-dimensional and can store more dimensions (e.g. several variables)
+- Major difference: `terra` doesn't treat the third dimension (time or band) as a "dimension" in the same way `stars` does.
+- Time is encoded via layer names or separate metadata in `terra` objects — you manage it manually.
+
+Informally we will call `SpatRaster` objects created with `terra` "raster stacks" and `stars` objects "raster cubes". 
+
+
+## Stacking raster layers
+
+We will start by manually creating our raster stacks/cubes by combining several layers. We will first show our `terra`-approach and afterwards replicate the process with `stars`. These steps include:
+
+- Combination of separate layers into one object
+- Adjustments to metadata and global attributes like:
+  - Time dimension
+  - CRS
+
+The output will be a clean raster stack/cube for further processing/analysis.
+
+
+## `terra` approach: stacking raster layers
+
+We load four layers of population data for California for the years 2017-2020.
+
+```{r}
+#| eval: false
+CA_pop_2017 <- terra::rast("./data/US-CA_ppp_2017_1km.tif")
+CA_pop_2018 <- terra::rast("./data/US-CA_ppp_2018_1km.tif")
+CA_pop_2019 <- terra::rast("./data/US-CA_ppp_2019_1km.tif")
+CA_pop_2020 <- terra::rast("./data/US-CA_ppp_2020_1km.tif")
+
+class(CA_pop_2017)
+
+CA_pop_2017
+```
+
+```{r}
+#| echo: false
+CA_pop_2017 <- terra::rast("../../data/US-CA_ppp_2017_1km.tif")
+CA_pop_2018 <- terra::rast("../../data/US-CA_ppp_2018_1km.tif")
+CA_pop_2019 <- terra::rast("../../data/US-CA_ppp_2019_1km.tif")
+CA_pop_2020 <- terra::rast("../../data/US-CA_ppp_2020_1km.tif")
+
+class(CA_pop_2017)
+
+CA_pop_2017
+```
+
+
+## `terra` approach: stacking raster layers
+
+We can simply concatenate (`c()`) the layers to create a raster stack.
+
+```{r}
+CA_pop_stack <- c(CA_pop_2017, CA_pop_2018, CA_pop_2019, CA_pop_2020)
+
+class(CA_pop_stack)
+
+CA_pop_stack
+```
+
+
+## `terra` approach: stacking raster layers
+
+We can integrate reading and stacking into one step by providing a list of raster layers to the `terra::rast()` command.
+
+```{r}
+#| eval: false
+# Stacking more automated
+files <- list.files("./data", pattern = "US-CA_ppp_20(17|18|19|20)_1km\\.tif$", full.names = TRUE)
+CA_pop_stack <- terra::rast(files)
+
+CA_pop_stack
+```
+
+```{r}
+#| echo: false
+# Stacking more automated
+files <- list.files("../../data", pattern = "US-CA_ppp_20(17|18|19|20)_1km\\.tif$", full.names = TRUE)
+CA_pop_stack <- terra::rast(files)
+
+CA_pop_stack
+```
+
+## `terra` approach: stacking raster layers
+
+You know that we can utilize the base `R` `plot` function to visualize `SpatRaster` objects. This is also true for raster stacks.
+
+:::: columns
+::: {.column width="50%"}
+```{r}
+#| eval: false
+#| fig.asp: 1
+# Have a first glance at the data
+terra::plot(CA_pop_stack)
+```
+:::
+
+::: {.column width="50%"}
+```{r}
+#| echo: false
+#| fig.asp: 1
+# Have a first glance at the data
+terra::plot(CA_pop_stack)
+```
+:::
+::::
+
+
+## `terra` approach: stacking raster layers
+
+Dates can be assigned to the layers. This will effectively create a new attribute in the object IN ADDITION to the name of the variable.
+
+```{r}
+layer_dates <- as.Date(paste0(2017:2020, "-01-01"))
+time(CA_pop_stack) <- layer_dates
+
+CA_pop_stack
+
+time(CA_pop_stack)
+
+timeInfo(CA_pop_stack)
+```
+
+
+## `terra` approach: stacking raster layers
+
+When plotting the raster stack, by default the machine understands to access the time attribute, not the names, to label the plots.
+
+:::: columns
+::: {.column width="50%"}
+```{r}
+#| eval: false
+#| fig.asp: 1
+# Have a first glance at the data
+terra::plot(CA_pop_stack)
+```
+:::
+
+::: {.column width="50%"}
+```{r}
+#| echo: false
+#| fig.asp: 1
+# Have a first glance at the data
+terra::plot(CA_pop_stack)
+```
+:::
+::::
+
+
+## `terra` approach: stacking raster layers
+
+When defining the time dimension, we can also store the time zone of the date.
+
+```{r}
+layer_posix <- as.POSIXct(layer_dates, tz = "UTC")
+
+time(CA_pop_stack) <- layer_posix
+
+time(CA_pop_stack)
+
+timeInfo(CA_pop_stack)
+```
+
+
+## `terra` approach: stacking raster layers
+
+When working with a yearly resolution, it is often consensus to set the date to the first of January. If you want to avoid confusion and explicitly assign only the year, you can do that by adjusting the `tstep=` argument in the `terra::time`-function.
+
+```{r}
+layer_years <- c(2017:2020)
+time(CA_pop_stack, tstep = "years") <- layer_years
+
+CA_pop_stack
+
+time(CA_pop_stack)
+
+timeInfo(CA_pop_stack)
+```
+
+
+## `terra` approach: stacking raster layers
+
+When working with a yearly resolution, it is often consensus to set the date to the first of January. If you want to avoid confusion and explicitly assign only the year, you can do that by adjusting the `tstep=` argument in the `terra::time`-function.
+
+:::: columns
+::: {.column width="50%"}
+```{r}
+#| eval: false
+#| fig.asp: 1
+# Have a first glance at the data
+terra::plot(CA_pop_stack)
+```
+:::
+
+::: {.column width="50%"}
+```{r}
+#| echo: false
+#| fig.asp: 1
+# Have a first glance at the data
+terra::plot(CA_pop_stack)
+```
+:::
+::::
+
+
+## `terra` approach: stacking raster layers
+
+By default, the variable name is derived from the file-name. We can replace it with a simpler version.
+
+```{r}
+# Adjust variable name
+names(CA_pop_stack) <- paste0("pop_", layer_years)
+
+print(CA_pop_stack)
+```
+
+
+## `terra` approach: stacking raster layers
+
+There are also options to adjust short and long variable names.
+
+```{r}
+# Optional - setting variable names
+varnames(CA_pop_stack) <- "population"
+
+longnames(CA_pop_stack) <- "California population estimate (1 km grid)"
+
+print(CA_pop_stack)
+```
+
+
+## `terra` approach: stacking raster layers
+
+Although in practice, we often don't do it, there is also the option to explicitly set the value unit.
+
+```{r}
+# Setting units
+units(CA_pop_stack)
+
+units(CA_pop_stack) <- "count"
+
+units(CA_pop_stack)
+```
+
+
+## `terra` approach: stacking raster layers
+
+For a quick glance at the distribution of the data, it is helpful to add minimum and maximum values to the metadata. By default not displayed because first reading raster from disk just creates a pointer object which does not read all cell values.
+
+```{r}
+setMinMax(CA_pop_stack, force=TRUE)
+
+print(CA_pop_stack)
+```
+
+
+## `terra` approach: stacking raster layers
+
+With the `crs`-function, we can directly access the CRS of the object. You can assign a label to the crs of the stack (for example in case it does not have one). **IMPORTANT:** Keep in mind that this **DOES NOT** reproject the data.
+
+```{r}
+crs(CA_pop_stack)
+
+# crs(CA_pop_stack) <- "EPSG:4326"
+```
+
+
+## `terra` approach: stacking raster layers
+
+If you want to reproject the data, you can utilize `project` as before. Here, we transform to NAD83 / California Albers (EPSG:3310).
+
+```{r}
+CA_pop_stack <- terra::project(CA_pop_stack, 
+                               y = "EPSG:3310",
+                               method = "bilinear"
+                               )
+
+print(CA_pop_stack)
+```
+
+
+## `terra` approach: stacking raster layers
+
+If you want to reproject the data, you can utilize `project` as before. Here, we transform to NAD83 / California Albers (EPSG:3310).
+
+:::: columns
+::: {.column width="50%"}
+```{r}
+#| eval: false
+#| fig.asp: 1
+# Have a first glance at the data
+terra::plot(CA_pop_stack)
+```
+:::
+
+::: {.column width="50%"}
+```{r}
+#| echo: false
+#| fig.asp: 1
+# Have a first glance at the data
+terra::plot(CA_pop_stack)
+```
+:::
+::::
+
+
+## Note on reprojecting raster data
+
+Transforming (projecting) raster data is fundamentally different from transforming vector data. Vector data can be transformed and back-transformed without loss in precision and without changes in the values. This is not the case with raster data. In each transformation the values for the new cells are estimated in some fashion. Therefore, if you need to match raster and vector data for analysis, you should generally transform the vector data.
+
+
+## `terra` approach: stacking raster layers
+
+Now that we have properly prepared variable names and times, we have several options to access single layers.
+
+```{r}
+# Indexing by layer index number
+CA_pop_stack[[1]]
+
+# Indexing by layer name
+CA_pop_stack["pop_2018"]
+
+# Indexing by time point
+CA_pop_stack["2019"]
+```
+
+
+## `terra` approach: stacking raster layers
+
+Now that we have properly prepared variable names and times, we have several options to access single layers.
+
+:::: columns
+::: {.column width="50%"}
+```{r}
+#| eval: false
+#| fig.asp: 1
+# Plot a single layer
+terra::plot(CA_pop_stack[[1]])
+```
+:::
+
+::: {.column width="50%"}
+```{r}
+#| echo: false
+#| fig.asp: 1
+# Plot a single layer
+terra::plot(CA_pop_stack[[1]])
+```
+:::
+::::
+
+
+## `terra` approach: stacking raster layers
+
+Exporting your object is the same for raster stacks.
+
+```{r}
+#| eval: false
+# Export
+writeRaster(
+  CA_pop_stack,
+  "./data/CA_pop_stack.tif",
+  overwrite=TRUE,
+  gdal=c("COMPRESS=LZW","BIGTIFF=YES")
+)
+```
+
+```{r}
+#| echo: false
+# Export
+writeRaster(
+  CA_pop_stack,
+  "../../data/CA_pop_stack.tif",
+  overwrite=TRUE,
+  gdal=c("COMPRESS=LZW","BIGTIFF=YES")
+)
+```
+
+
+## Exercise 5_1: A raster stack with `terra`
+
+[Exercise](https://stefanjuenger.github.io/gesis-workshop-geospatial-techniques-R-2025/exercises/5_2_The_Perfect_Map.html)
+
+
+## `stars` approach: stacking raster layers
+
+We will now repeat this process with `stars`. We load four layers of population data for California for the years 2017-2020 with `read_stars`.
+
+```{r}
+#| eval: false
+CA_pop_2017 <- read_stars("./data/US-CA_ppp_2017_1km.tif")
+CA_pop_2018 <- read_stars("./data/US-CA_ppp_2018_1km.tif")
+CA_pop_2019 <- read_stars("./data/US-CA_ppp_2019_1km.tif")
+CA_pop_2020 <- read_stars("./data/US-CA_ppp_2020_1km.tif")
+
+class(CA_pop_2017)
+
+print(CA_pop_2017)
+```
+
+```{r}
+#| echo: false
+CA_pop_2017 <- read_stars("../../data/US-CA_ppp_2017_1km.tif")
+CA_pop_2018 <- read_stars("../../data/US-CA_ppp_2018_1km.tif")
+CA_pop_2019 <- read_stars("../../data/US-CA_ppp_2019_1km.tif")
+CA_pop_2020 <- read_stars("../../data/US-CA_ppp_2020_1km.tif")
+
+class(CA_pop_2017)
+
+print(CA_pop_2017)
+```
+
+
+## `stars` approach: stacking raster layers
+
+Concatenating (`c()`) `stars` layers also works.
+
+```{r}
+CA_pop_cube <- c(CA_pop_2017, CA_pop_2018, CA_pop_2019, CA_pop_2020)
+
+class(CA_pop_cube)
+
+print(CA_pop_cube)
+```
+
+
+## `stars` approach: stacking raster layers
+
+Again, integrating these steps is more efficient.
+
+**BUT WAIT!** This generates four separate attributes. **This is not what we want!**
+
+```{r}
+#| eval: false
+files <- list.files("./data",
+                    pattern = "US-CA_ppp_20(17|18|19|20)_1km\\.tif$",
+                    full.names = TRUE)
+CA_pop_cube <- read_stars(files)
+
+print(CA_pop_cube)
+```
+
+```{r}
+#| echo: false
+files <- list.files("../../data",
+                    pattern = "US-CA_ppp_20(17|18|19|20)_1km\\.tif$",
+                    full.names = TRUE)
+CA_pop_cube <- read_stars(files)
+
+print(CA_pop_cube)
+```
+
+
+## `stars` approach: stacking raster layers
+
+We want to integrate the values into one attribute since it is the same variable.
+
+In order to do that, we need to create the time-dimension first.
+
+```{r}
+dates <- as.Date(paste0(2017:2020, "-01-01"))
+```
+
+
+## `stars` approach: stacking raster layers
+
+We can apply the `merge`-function on our existing datacube to integrate the four attributes into one by supplying the dates:
+
+```{r}
+cube_merged <- merge(CA_pop_cube, f = dates, name = "time")
+
+print(cube_merged)
+```
+
+
+## `stars` approach: stacking raster layers
+
+A more straightforward approach is to read the layers directly into one object based on the supplied date-variable:
+
+```{r}
+#| eval: false
+files <- list.files("./data",
+                    pattern = "US-CA_ppp_20(17|18|19|20)_1km\\.tif$",
+                    full.names = TRUE)
+
+# Read layers along time dimension
+CA_pop_cube <- read_stars(files, along = list(time = dates))
+
+print(CA_pop_cube)
+```
+
+```{r}
+#| echo: false
+files <- list.files("../../data",
+                    pattern = "US-CA_ppp_20(17|18|19|20)_1km\\.tif$",
+                    full.names = TRUE)
+
+# Read layers along time dimension
+CA_pop_cube <- read_stars(files, along = list(time = dates))
+
+print(CA_pop_cube)
+```
+
+
+## `stars` approach: stacking raster layers
+
+The `st_dimensions()`and `st_set_dimensions()` functions are super helpful to access and manipulate dimension information. For example, if we want to transform the date into POSIX and assign a timezone, we can do it like this:
+
+```{r}
+layer_posix <- as.POSIXct(dates, tz = "UTC")
+CA_pop_cube <- st_set_dimensions(CA_pop_cube,
+                                 which = "time",
+                                 values = layer_posix)
+
+st_dimensions(CA_pop_cube)$time
+```
+
+
+## `stars` approach: stacking raster layers
+
+We can also simplify the dimension by assigning years as numeric values.
+
+```{r}
+CA_pop_cube <- st_set_dimensions(CA_pop_cube,
+                          which = "time",
+                          values = 2017:2020)
+
+st_dimensions(CA_pop_cube)$time
+```
+
+
+## `stars` approach: stacking raster layers
+
+In `stars` lingo, our variable is called "attribute". We can relabel this name as well.
+
+```{r}
+names(CA_pop_cube)
+
+names(CA_pop_cube) <- "population"
+
+print(CA_pop_cube)
+```
+
+
+## `stars` approach: stacking raster layers
+
+Setting units in `stars` is not that straightforward and requires a "manual" and quite complicated workaround. Normally, we wouldn't recommend that.
+
+```{r}
+pop_array <- CA_pop_cube[["population"]]
+
+valid_units <- valid_udunits()
+
+pop_array <- set_units(pop_array, "count")
+
+CA_pop_cube[["population"]] <- pop_array
+
+print(CA_pop_cube)
+```
+
+
+## `stars` approach: stacking raster layers
+
+Access to the CRS is easy with `st_crs`. The EPSG code is not supplied as string ("EPSG:XXXX") but as numeric values.
+
+```{r}
+# CRS
+st_crs(CA_pop_cube)
+# to label is missing - not to reproject
+# st_crs(CA_pop_cube) <- 4326
+```
+
+
+## `stars` approach: stacking raster layers
+
+We can reproject the data with `st_warp()`. Default of `use_gdal` argument is `TRUE`. Unfortunately, this will remove our time-dimension metadata assigned earlier. Set it to `FALSE` to preserve that. This has the downside that the native `stars` warp is limited to nearest-neighbor resampling and slower. Alternative is to reassign time-metadata afterwards.
+
+```{r}
+CA_pop_cube <- st_warp(CA_pop_cube, 
+                       crs = 3310,
+                       cellsize = NA_real_,
+                       use_gdal = FALSE # to preserve time-dimension metadata
+                       )
+
+print(CA_pop_cube)
+```
+
+
+## `stars` approach: stacking raster layers
+
+We index time layers by index number.
+
+```{r}
+CA_pop_cube[,,,1]
+```
+
+
+## `stars` approach: stacking raster layers
+
+There is also a native export function for `stars` objects.
+
+```{r}
+#| eval: false
+write_stars(CA_pop_cube,
+            "./data/CA_pop_cube.tif",
+            driver = "GTiff",
+            options = c("COMPRESS=LZW", "BIGTIFF=YES")
+            )
+```
+
+```{r}
+#| echo: false
+write_stars(CA_pop_cube,
+            "../../data/CA_pop_cube.tif",
+            driver = "GTiff",
+            options = c("COMPRESS=LZW", "BIGTIFF=YES")
+            )
+```
+
+
+## Converting between `terra` and `stars`
+
+**NOCHMAL CHECKEN - HIER IST WAS FALSCH**
+In theory, converting between `terra` and `stars` objects is simple. This will preserve most crucial information on cell values, spatial extent, and CRS. It can, however, mess around with your neatly prepared metadata.
+
+```{r}
+# Tranform terra SpatRaster into stars object
+# CA_pop_stack_stars <- stars::st_as_stars(CA_pop_stack)
+# 
+# class(CA_pop_stack_stars)
+# 
+# print(CA_pop_stack_stars)
+```
+
+
+## Converting between `terra` and `stars`
+
+In theory, converting between `terra` and `stars` objects is simple. This will preserve most crucial information on cell values, spatial extent, and CRS. It can, however, mess around with your neatly prepared metadata.
+
+```{r}
+# Tranform stars object into terra SpatRaster
+# CA_pop_cube_terra <- terra::rast(CA_pop_cube)
+# 
+# class(CA_pop_cube_terra)
+# 
+# print(CA_pop_cube_terra)
+```
+
+
+## Exercise 5_2: A raster cube with `stars`
+
+[Exercise](https://stefanjuenger.github.io/gesis-workshop-geospatial-techniques-R-2025/exercises/5_2_The_Perfect_Map.html)
