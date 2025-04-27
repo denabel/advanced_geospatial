@@ -1,0 +1,169 @@
+---
+title: "Exercise 2_2: Basic Raster Operations"
+subtitle: 'Advanced Geospatial Data Processing for Social Scientists'
+author: Dennis Abel & Stefan Jünger
+format: 
+  html:
+    embed-resources: true
+    code-copy: true
+execute:
+  echo: true
+editor: visual
+callout-icon: false
+callout-appearance: minimal
+editor_options: 
+  chunk_output_type: console
+---
+
+In the next three exercises, we’ll dive into the world of raster data.
+You'll practice importing different raster formats, explore the properties of spatial layers, and even create a new raster layer by combining datasets.
+
+Along the way, you might encounter a few common challenges, like dealing with different coordinate systems. These are great opportunities to sharpen your spatial data skills! 🚀🗺️
+
+Let’s jump in!
+
+### Exercises
+
+::: callout-note
+## `r emo::ji("weight_lifting_man")` Exercise 1
+
+In this exercise, you’ll import a raster `.tif` file from the `./data/z22` folder.
+Once loaded, take a moment to explore the raster's dimensions, resolution, and other key properties.
+Feel free to visualize it to get an initial sense of its content!
+
+:::
+
+::: {.callout-caution collapse="true"}
+## `r emo::ji("bulb")` Tip
+
+You can use the `terra` package to load raster files. With the `terra::rast()` function, you’ll be able to load your `.tif` file and start working with it.
+
+:::
+
+::: callout-note
+## `r emo::ji("weight_lifting_man")` Exercise 2
+
+In this exercise, you’ll import a NetCDF file (`.nc`) from the `./data/z22` folder.
+Once you’ve successfully loaded it, check out the dimensions and variables within the file.
+This is a great chance to get familiar with different raster data file formats!
+
+:::
+
+::: {.callout-caution collapse="true"}
+## `r emo::ji("bulb")` Tip
+
+To work with `.nc` files, you can also use the `terra` package. The `terra::rast()` function works for NetCDF files, just like for raster TIF files.
+
+:::
+
+::: callout-note
+## `r emo::ji("weight_lifting_man")` Exercise 3
+
+Now it’s time to get creative! 🎨 You’ve already imported both a TIF file and a NetCDF file. In this exercise, combine these two datasets to create a new raster layer. You can experiment by performing basic operations like adding, multiplying, or averaging the values from the two layers.
+
+:::
+
+::: {.callout-caution collapse="true"}
+## `r emo::ji("bulb")` Tip
+However, beware:
+Since the CRS of the two datasets might not match, you could encounter a warning.
+Take a moment to investigate and correct it!
+
+- Check the CRS of both datasets with `terra::crs()`.
+- If necessary, use `terra::project()` to align the CRS of both layers.
+- Once aligned, you can perform mathematical operations like +, -, *, or / on the two layers.
+
+:::
+
+### Solutions
+
+::: {.callout-tip collapse="true"}
+## `r emo::ji("white_check_mark")` Solution 1
+
+```{r}
+#| eval: false
+library(terra)
+
+# Load the raster data
+age_65_tif <- terra::rast("./data/z22/age_from_65.tif")
+
+# Explore the raster
+print(age_65_tif)                 # Check basic info
+dim(age_65_tif)                   # Check dimensions
+terra::res(age_65_tif)            # Resolution
+
+# Optional: visualize it
+plot(age_65_tif)
+```
+
+```{r}
+#| echo: false
+library(terra)
+
+# Load the raster data
+age_65_tif <- terra::rast("../../data/z22/age_from_65.tif")
+
+# Explore the raster
+print(age_65_tif)                 # Check basic info
+dim(age_65_tif)                   # Check dimensions
+terra::res(age_65_tif)            # Resolution
+
+# Optional: visualize it
+plot(age_65_tif)
+```
+
+:::
+
+::: {.callout-tip collapse="true"}
+## `r emo::ji("white_check_mark")` Solution 2
+
+```{r}
+#| eval: false
+# Load the NetCDF file
+population_nc <- terra::rast("./data/z22/population.nc")
+
+# Explore the NetCDF file
+print(population_nc)             # Check basic info
+dim(population_nc)               # View dimensions
+names(population_nc)             # Check variable names
+
+# Optional: visualize one of the variables
+plot(population_nc[[1]])         # Plot the first variable
+```
+
+```{r}
+#| echo: false
+# Load the NetCDF file
+population_nc <- terra::rast("../../data/z22/population.nc")
+
+# Explore the NetCDF file
+print(population_nc)             # Check basic info
+dim(population_nc)               # View dimensions
+names(population_nc)             # Check variable names
+
+# Optional: visualize one of the variables
+plot(population_nc[[1]])         # Plot the first variable
+```
+:::
+
+::: {.callout-tip collapse="true"}
+## `r emo::ji("white_check_mark")` Solution 3
+
+```{r}
+# Check the CRS of both datasets
+crs_age_65_tif <- terra::crs(age_65_tif)
+crs_population_nc <- terra::crs(population_nc)
+
+# If CRS don't match, align them
+if (crs_age_65_tif != crs_population_nc) {
+  age_65_tif <- terra::project(age_65_tif, population_nc)
+}
+
+# Combine the layers (example: calculate number of people >= 65 years)
+old_peeps <- population_nc * (age_65_tif / 100)
+
+# Explore the new raster layer
+plot(old_peeps)
+```
+
+:::
