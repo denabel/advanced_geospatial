@@ -248,6 +248,10 @@ plot(pop_grid_2022_crop)
 :::
 ::::
 
+## Exercise 3_1: Subsetting Raster Data
+
+![](../img/cat_quality.webp){width="45%" fig-align="center"}
+
 ## Extraction & Aggregation {.center style="text-align: center;"}
 
 ## Changes in terminology
@@ -962,6 +966,10 @@ We can now clearly display the edges of sudden changes in population sizes withi
 plot(foreigners_berlin_smooth)
 plot(foreigners_berlin_edges)
 ```
+
+## Exercise 3_2: Extracting and Analyzing Raster Information
+
+![](../img/cat_quality.webp){width="45%" fig-align="center"}
 
 ## Conversion {.center style="text-align: center;"}
 
