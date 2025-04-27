@@ -1,0 +1,199 @@
+---
+title: "Exercise 3_1: Subsetting Raster Data"
+subtitle: 'Advanced Geospatial Data Processing for Social Scientists'
+author: Dennis Abel & Stefan Jünger
+format: 
+  html:
+    embed-resources: true
+    code-copy: true
+execute:
+  echo: true
+editor: visual
+callout-icon: false
+callout-appearance: minimal
+editor_options: 
+  chunk_output_type: console
+---
+
+In the following two exercises, you'll practice editing raster data and visualizing it clearly and creatively.
+You'll learn how to cut rasters based on administrative boundaries, combine multiple rasters into one view, and explore how to style maps with simple but powerful base R tools.
+
+These are essential steps when preparing geospatial data for analysis and presentation — and a great chance to apply everything you've learned so far!
+
+### Exercises
+
+::: callout-note
+## `r emo::ji("weight_lifting_man")` 1
+
+Choose another raster layer from the `./data/z22/` folder — either a `.tif` or a `.nc` file.
+Your task is to split the raster into two parts: one for the northern and one for the southern part of Germany!
+
+Use the shapefile `VG250_LAN.shp` (located in `./data/`) to help define the boundaries:
+This shapefile contains the outlines of Germany’s federal states (Bundesländer).
+
+:::
+
+::: {.callout-caution collapse="true"}
+## `r emo::ji("bulb")` Tip
+
+- Load the shapefile with `sf::st_read()`.
+- Use the attribute table to find which states are in the north and which are in the south.
+- You can create subsets of the polygons based on the "GEN" column.
+- To cut the raster, you can use `terra::crop()`, `terra::mask()` or both combined with your north/south polygons.
+
+You can split the federal states into "North" and "South" — but keep in mind, some states are geographically in between ("gray zone").
+Here's a rough guide:
+
+Northern Germany (examples):
+
+- Schleswig-Holstein
+- Hamburg
+- Bremen
+- Lower Saxony (Niedersachsen)
+- Mecklenburg-Vorpommern
+- Brandenburg
+- Berlin
+
+Southern Germany (examples):
+- Bavaria (Bayern)
+- Baden-Württemberg
+- Saarland
+- Rhineland-Palatinate (Rheinland-Pfalz)
+
+Gray zone (in between North and South):
+- North Rhine-Westphalia (Nordrhein-Westfalen)
+- Hesse (Hessen)
+- Saxony (Sachsen)
+- Saxony-Anhalt (Sachsen-Anhalt)
+- Thuringia (Thüringen)
+
+Feel free to decide for yourself how you classify the "gray zone" states!
+Your definition is part of the creative freedom in this exercise.
+
+:::
+
+::: callout-note
+## `r emo::ji("weight_lifting_man")` Exercise 2
+
+Now that you've split the raster into Northern and Southern Germany, let’s visualize your work!
+Your task:
+
+- Create one map showing the northern raster.
+- Create one map showing the southern raster.
+- Bonus: Combine both rasters on one map, using different color palettes to highlight the difference!
+
+:::
+
+::: {.callout-caution collapse="true"}
+## `r emo::ji("bulb")` Tip
+
+- Use plot() for each raster.
+- To combine them, first plot one raster, then add the second one with `add = TRUE`.
+- You can adjust the color palettes with the `col` argument (e.g., `terrain.colors()`, `heat.colors()`).
+
+Example palettes you might try:
+
+- North: `terrain.colors(20)`
+- South: `heat.colors(20)`
+
+:::
+
+### Solutions
+
+::: {.callout-tip collapse="true"}
+## `r emo::ji("white_check_mark")` Solution 1
+
+```{r}
+#| eval: false
+library(sf)
+library(terra)
+
+# Load the raster file
+buildings <- terra::rast("./data/z22/buildings.tif")  
+
+# Load the federal states shapefile
+states <- sf::st_read("./data/VG250_LAN.shp", quiet = TRUE)
+
+# Define northern states
+north_states <- 
+  states |> 
+  dplyr::filter(
+    GEN %in% c(
+      "Schleswig-Holstein", "Hamburg", "Bremen", "Niedersachsen", 
+      "Mecklenburg-Vorpommern", "Brandenburg", "Berlin", "Nordrhein-Westfalen", 
+      "Sachsen-Anhalt"
+    )
+  )
+
+# Define southern states
+south_states <- 
+  states |> 
+  dplyr::filter(
+    GEN %in% c(
+      "Bayern", "Baden-Württemberg", "Saarland", "Rheinland-Pfalz", "Hessen", 
+      "Sachsen", "Thüringen"
+    )
+  )
+
+# Cut the raster into two parts
+buildings_north <- terra::mask(raster_data, north_states)
+buildings_south <- terra::mask(raster_data, south_states)
+```
+
+```{r}
+#| echo: false
+library(sf)
+library(terra)
+
+# Load the raster file
+buildings <- terra::rast("../../data/z22/buildings.tif")  
+
+# Load the federal states shapefile
+states <- sf::st_read("../../data/VG250_LAN.shp", quiet = TRUE)
+
+# Define northern states
+north_states <- 
+  states |> 
+  dplyr::filter(
+    GEN %in% c(
+      "Schleswig-Holstein", "Hamburg", "Bremen", "Niedersachsen", 
+      "Mecklenburg-Vorpommern", "Brandenburg", "Berlin", "Nordrhein-Westfalen", 
+      "Sachsen-Anhalt"
+    )
+  )
+
+# Define southern states
+south_states <- 
+  states |> 
+  dplyr::filter(
+    GEN %in% c(
+      "Bayern", "Baden-Württemberg", "Saarland", "Rheinland-Pfalz", "Hessen", 
+      "Sachsen", "Thüringen"
+    )
+  )
+
+# Cut the raster into two parts
+buildings_north <- terra::mask(buildings, north_states)
+buildings_south <- terra::mask(buildings, south_states)
+```
+
+:::
+
+::: {.callout-tip collapse="true"}
+## `r emo::ji("white_check_mark")` Solution 2
+
+```{r}
+# Plot Northern Germany raster
+plot(buildings_north, main = "Northern Germany", col = terrain.colors(20))
+
+# Plot Southern Germany raster
+plot(buildings_south, main = "Southern Germany", col = heat.colors(20))
+
+# Combine both in one map
+plot(buildings_north, main = "North and South Germany", col = terrain.colors(20))
+plot(buildings_south, add = TRUE, col = heat.colors(20))
+
+```
+
+:::
+
