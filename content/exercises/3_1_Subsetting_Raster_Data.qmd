@@ -22,7 +22,7 @@ These are essential steps when preparing geospatial data for analysis and presen
 ### Exercises
 
 ::: callout-note
-## `r emo::ji("weight_lifting_man")` 1
+## `r emo::ji("weight_lifting_man")` Exercise 1
 
 Choose another raster `.tif` layer from the `./data/z22/` folder. Your task is to split the raster into two parts: one for the northern and one for the southern part of Germany!
 
@@ -49,9 +49,20 @@ Northern Germany (examples):
 -   Brandenburg
 -   Berlin
 
-Southern Germany (examples): - Bavaria (Bayern) - Baden-Württemberg - Saarland - Rhineland-Palatinate (Rheinland-Pfalz)
+Southern Germany (examples): 
 
-Gray zone (in between North and South): - North Rhine-Westphalia (Nordrhein-Westfalen) - Hesse (Hessen) - Saxony (Sachsen) - Saxony-Anhalt (Sachsen-Anhalt) - Thuringia (Thüringen)
+- Bavaria (Bayern) 
+- Baden-Württemberg 
+- Saarland 
+- Rhineland-Palatinate (Rheinland-Pfalz)
+
+Gray zone (in between North and South): 
+
+- North Rhine-Westphalia (Nordrhein-Westfalen) 
+- Hesse (Hessen) 
+- Saxony (Sachsen) 
+- Saxony-Anhalt (Sachsen-Anhalt) 
+- Thuringia (Thüringen)
 
 Feel free to decide for yourself how you classify the "gray zone" states! Your definition is part of the creative freedom in this exercise.
 :::
