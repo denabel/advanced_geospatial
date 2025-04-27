@@ -172,18 +172,17 @@ hello_world
 ## We can already plot it
 
 ```{r}
-plot(hello_world["FID"])
+plot(sf::st_geometry(hello_world))
 ```
 
 ## This is the bounding box
 
 ```{r}
 #| echo: false
-# plot(german_states["hello_world"])
-
+plot(sf::st_geometry(hello_world))
 sf::st_bbox(hello_world) |> 
   sf::st_as_sfc(crs = sf::st_crs(hello_world)) |> 
-  plot()
+  plot(add = TRUE)
 ```
 
 ## Inspect your data: classics
@@ -194,7 +193,6 @@ There are no huge differences between the file we just imported and a regular da
 # head of data table
 head(hello_world, 2)
 ```
-
 
 ## Inspect your data: spatial features
 
@@ -227,7 +225,7 @@ sf::st_crs(hello_world)
 
 ## Spatial joins
 
-Often we want to combine geospatial datasets from different sources. The choice of an appropriate method depends, once again, on the data format. In the world of vector data, we usually speak of "spatial joins" when linking two vector datasets. Let's pull in more spatially narrowed data.
+Often, we want to combine geospatial datasets from different sources. The choice of an appropriate method depends, once again, on the data format. In the world of vector data, we usually speak of "spatial joins" when linking two vector datasets. Let's pull in more spatially narrowed data.
 
 :::: columns
 ::: {.column width="50%"}
@@ -267,7 +265,7 @@ plot(german_districts["AGS"])
 
 ## Spatial joins
 
-We can craft a toy example to demonstrate spatial joins using the synthetic survey geocoordinates. This is how they look.
+Using the synthetic survey geocoordinates, we can craft a toy example to demonstrate spatial joins. This is how they look.
 
 :::: columns
 ::: {.column width="50%"}
@@ -279,21 +277,21 @@ points <-
   ) |> 
   sf::st_transform(sf::st_crs(german_districts))
 
-plot(points)
+plot(sf::st_geometry(points))
 ```
 :::
 
 ::: {.column width="50%"}
 ```{r}
 #| echo: false
-#| fig-asp: .7
+#| fig-asp: .9
 points <- 
   readRDS(
     "../../data/synthetic_survey_coordinates.rds"
   ) |> 
   sf::st_transform(sf::st_crs(german_districts))
 
-plot(points)
+plot(sf::st_geometry(points))
 ```
 :::
 ::::
@@ -301,7 +299,7 @@ plot(points)
 
 ## Spatial joins
 
-It would be nice, if we had regional identifiers in our points data but there aren't any. This issue shows where spatial joins come in handy. We can use `sf::st_join()` to extract this information.
+It would be nice if we had regional identifiers in our points data, but there aren't any. This issue shows where spatial joins come in handy. We can use `sf::st_join()` to extract this information.
 
 ```{r}
 points_ags <-  sf::st_join(points, german_districts["AGS"])
@@ -311,13 +309,13 @@ points_ags
 
 ## There's more
 
-In this course, we only use a subset of the options for spatial joins in `sf`. For more please refer to the official [sf cheat sheet](https://rstudio.github.io/cheatsheets/sf.pdf).
+In this course, we only use a subset of the options for spatial joins in `sf`. Please refer to the official [sf cheat sheet](https://rstudio.github.io/cheatsheets/sf.pdf).
 
 ![](../img/sf_cheatsheet.jpg){.r-stretch fig-align="center"}
 
 ## Finally: Transforming the CRS
 
-Depending on our data sources, we have to change our CRS fairly often. That's easily doable in `sf` using the `sf::st_transform()`. Here's a closer look.
+We have to change our CRS fairly often depending on our data sources. That's easily doable in `sf` using the `sf::st_transform()`. Here's a closer look.
 
 ```{r}
 sf::st_crs(german_districts)$epsg
@@ -436,7 +434,7 @@ pop_grid_ger_2022
 
 ## Loading raster tiffs (German Census Data 2022)
 
-Let's load another dataset for comparing structures, because that's really easy in `terra`.
+Let's load another dataset to compare structures because that's really easy in `terra`.
 
 ```{r}
 #| eval: false
@@ -524,7 +522,7 @@ terra::plot(young_people)
 
 ## Loading raster data with `stars`
 
-Later, we will work with multidimensional raster data cubes. While it is possible to work them a bit also in `terra`, `stars` is way more elaborated. Just that you already can see, how to import raster data with `stars`, here's an example.
+Later, we will work with multidimensional raster data cubes. While it is possible to work them in `terra`, `stars` is way more elaborated (we'll discuss it tomorrow in more detail). So, here is an example of how to load raster data into `stars`.
 
 ```{r}
 #| eval: false
@@ -564,7 +562,7 @@ plot(pop_grid_ger_2022_stars)
 
 ## Finally: Transforming the CRS
 
-As mentioned before, we may have to change the CRS also of our raster data. Going back to `terra`, this is not called 'transforming' but 'projecting' (which makes sense, right?).
+As mentioned before, we may also have to change the CRS of our raster data. Returning to `terra`, this is not called 'transforming' but 'projecting' (which makes sense, right?).
 
 ```{r}
 terra::crs(pop_grid_ger_2022, describe = TRUE)$code
