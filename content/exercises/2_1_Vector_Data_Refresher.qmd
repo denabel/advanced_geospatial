@@ -21,6 +21,8 @@ Along the way, you’ll have the chance to explore, experiment, and solve proble
 
 Let’s get started and have some fun with spatial data! 🌍✨
 
+### Exercises
+
 ::: callout-note
 ## `r emo::ji("weight_lifting_man")` Exercise 1
 
@@ -76,6 +78,8 @@ Make sure they match before trying to perform the spatial join — otherwise, yo
 
 You could also transform the polygons instead of the points — it depends on what fits better. Always double-check that geometries line up properly after transformation (e.g., by plotting)!
 :::
+
+### Solutions
 
 ::: {.callout-tip collapse="true"}
 ## `r emo::ji("white_check_mark")` Solution 1
