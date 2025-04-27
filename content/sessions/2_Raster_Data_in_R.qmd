@@ -331,6 +331,10 @@ german_districts_4326 <-  sf::st_transform(german_districts, 4326)
 sf::st_crs(german_districts_4326)$epsg
 ```
 
+## Exercise 2_1: Vector Data Refresher
+
+![](../img/cat_quality.webp){width="45%" fig-align="center"}
+
 ## Raster data {.center style="text-align: center;"}
 
 ## Difference to vector data
@@ -412,40 +416,40 @@ Some other developments, e.g., in the `stars` package, also implement an interfa
 
 The `terra` package helps to employ zonal statistics. But the `spatstat` package is even more elaborated.
 
-## Loading raster tiffs (raw WorldPop data)
+## Loading raster tiffs (German Census Data 2022)
 
 Loading raster data in `terra` is straightforward. For this purpose, we use the function `terra::rast()`.
 
 ```{r}
 #| eval: false
-pop_grid_ger_2020 <- terra::rast("./data/deu_ppp_2020_1km_Aggregated.tif")
+pop_grid_ger_2022 <- terra::rast("./data/z22/population.tif")
 
-pop_grid_ger_2020
+pop_grid_ger_2022
 ```
 
 ```{r}
 #| echo: false
-pop_grid_ger_2020 <- terra::rast("../../data/deu_ppp_2020_1km_Aggregated.tif")
+pop_grid_ger_2022 <- terra::rast("../../data/z22/population.tif")
 
-pop_grid_ger_2020
+pop_grid_ger_2022
 ```
 
-## Loading raster tiffs (raw WorldPop data)
+## Loading raster tiffs (German Census Data 2022)
 
 Let's load another dataset for comparing structures, because that's really easy in `terra`.
 
 ```{r}
 #| eval: false
-pop_grid_ger_2000 <- terra::rast("./data/deu_ppp_2000_1km_Aggregated.tif")
+age_under_18_grid_2022 <- terra::rast("./data/z22/age_under_18.tif")
 
-pop_grid_ger_2000
+age_under_18_grid_2022
 ```
 
 ```{r}
 #| echo: false
-pop_grid_ger_2000 <- terra::rast("../../data/deu_ppp_2000_1km_Aggregated.tif")
+age_under_18_grid_2022 <- terra::rast("../../data/z22/age_under_18.tif")
 
-pop_grid_ger_2000
+age_under_18_grid_2022
 ```
 
 ## Compare layers by plotting
@@ -455,8 +459,7 @@ pop_grid_ger_2000
 ```{r}
 #| fig.asp: .7
 terra::plot(
-  pop_grid_ger_2000, 
-  range = c(0, 4000)
+  pop_grid_ger_2022
 )
 ```
 :::
@@ -465,8 +468,7 @@ terra::plot(
 ```{r}
 #| fig.asp: .7
 terra::plot(
-  pop_grid_ger_2020, 
-  range = c(0, 4000)
+  age_under_18_grid_2022
 )
 ```
 :::
@@ -482,7 +484,7 @@ Working with raster data is straightforward
 For example, to calculate the mean, we can use the following:
 
 ```{r}
-terra::global(pop_grid_ger_2000, fun = "mean", na.rm = TRUE)
+terra::global(pop_grid_ger_2022, fun = "mean", na.rm = TRUE)
 ```
 
 
@@ -491,7 +493,7 @@ terra::global(pop_grid_ger_2000, fun = "mean", na.rm = TRUE)
 We can also extract the values of a raster directly as a vector:
 
 ```{r}
-all_raster_values <- terra::values(pop_grid_ger_2000)
+all_raster_values <- terra::values(pop_grid_ger_2022)
 
 mean(all_raster_values, na.rm = TRUE)
 ```
@@ -503,10 +505,11 @@ Nevertheless, although raster data are simple data tables, working with them is 
 :::: columns
 ::: {.column width="50%"}
 ```{r}
-pop_grid_ger_2000_2020 <-  
-  pop_grid_ger_2020 - pop_grid_ger_2000
+young_people <- 
+  pop_grid_ger_2022 * 
+  (age_under_18_grid_2022 / 100)
 
-pop_grid_ger_2000_2020
+young_people
 ```
 :::
 
@@ -514,7 +517,7 @@ pop_grid_ger_2000_2020
 ```{r}
 #| echo: false
 #| fig.asp: .8
-terra::plot(pop_grid_ger_2000_2020)
+terra::plot(young_people)
 ```
 :::
 ::::
@@ -525,18 +528,18 @@ Later, we will work with multidimensional raster data cubes. While it is possibl
 
 ```{r}
 #| eval: false
-pop_grid_ger_2020_stars <- 
-  stars::read_stars("./data/deu_ppp_2020_1km_Aggregated.tif")
+pop_grid_ger_2022_stars <- 
+  stars::read_stars("./data/z22/population.tif")
 
-pop_grid_ger_2020_stars
+pop_grid_ger_2022_stars
 ```
 
 ```{r}
 #| echo: false
-pop_grid_ger_2020_stars <- 
-  stars::read_stars("../../data/deu_ppp_2020_1km_Aggregated.tif")
+pop_grid_ger_2022_stars <- 
+  stars::read_stars("../../data/z22/population.tif")
 
-pop_grid_ger_2020_stars
+pop_grid_ger_2022_stars
 ```
 
 ## `stars` objects can also be plotted
@@ -546,7 +549,7 @@ pop_grid_ger_2020_stars
 ```{r}
 #| eval: false
 #| fig.asp: 1
-plot(pop_grid_ger_2020_stars)
+plot(pop_grid_ger_2022_stars)
 ```
 :::
 
@@ -554,7 +557,7 @@ plot(pop_grid_ger_2020_stars)
 ```{r}
 #| echo: false
 #| fig.asp: 1
-plot(pop_grid_ger_2020_stars)
+plot(pop_grid_ger_2022_stars)
 ```
 :::
 ::::
@@ -564,13 +567,17 @@ plot(pop_grid_ger_2020_stars)
 As mentioned before, we may have to change the CRS also of our raster data. Going back to `terra`, this is not called 'transforming' but 'projecting' (which makes sense, right?).
 
 ```{r}
-terra::crs(pop_grid_ger_2020, describe = TRUE)$code
+terra::crs(pop_grid_ger_2022, describe = TRUE)$code
 ```
 
-Let's pretend we want to use the EPSG code `25832`--no problem!
+Let's pretend we want to use the EPSG code `3035`--no problem!
 
 ```{r}
-pop_grid_ger_2020_25832 <- terra::project(pop_grid_ger_2020, "EPSG:25832")
+pop_grid_ger_2022_3035 <- terra::project(pop_grid_ger_2022, "EPSG:3035")
 
-terra::crs(pop_grid_ger_2020_25832, describe = TRUE)$code
+terra::crs(pop_grid_ger_2022_3035, describe = TRUE)$code
 ```
+
+## Exercise 2_2: Basic Raster Operations
+
+![](../img/cat_quality.webp){width="45%" fig-align="center"}
