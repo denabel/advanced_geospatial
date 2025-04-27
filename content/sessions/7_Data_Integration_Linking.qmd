@@ -38,7 +38,7 @@ course_content |>
 
 ## Survey data: ISSP Environment (1993-2020)
 
-After downloading the ISSP data file from the website, we placed it in our .`/data` folder. We have already prepared a script in the folder `./R` called `prep_issp.r` to prepare the data and which we simply call with `source()`. 
+After downloading the ISSP data file from the website, we placed it in our .`/data` folder. We have already prepared a script in the folder `./R` called `prep_issp.r` to prepare the data, which we call using `source()`. 
 
 ```{r}
 #| eval: false
@@ -75,7 +75,7 @@ likert_plot_2020
 
 ## EO indicators
 
-We want to investigate whether temperature anomalies in the year of the survey, in comparison to a long running average, are associated with climate change concern.
+We want to investigate whether temperature anomalies in the year of the survey, compared to a long-running average, are associated with climate change concerns.
 
 1. *Indicator*: Temperature - annual average
 2. *Intensity*: Anomaly (mean deviation)
@@ -85,13 +85,13 @@ We want to investigate whether temperature anomalies in the year of the survey, 
 
 ## ERA5 data
 
-The ERA5-Land Reanalyis from the Copernicus Climate Change Service is a suitable data product for this temperature indicator. It records observations on air temperature at 2 meters above the surface from 1950 onwards, has a spatial resolution of 0.1x0.1 degrees and a global spatial coverage. We can apply our conceptualization exactly to these data.
+The ERA5-Land Reanalysis from the Copernicus Climate Change Service is a suitable data product for this temperature indicator. It records observations on air temperature at 2 meters above the surface from 1950 onwards, has a spatial resolution of 0.1x0.1 degrees, and has global spatial coverage. We can apply our conceptualization exactly to these data.
 
 ![](../img/eo_indicators.png){.r-stretch fig-align="center"}
 
 ## Data access and preparation
 
-In order to access the data, we need an ECMWF-account. Utilizing the `ecmwfr` package, we can access the data directly in `R`. Given that we want to aggregate the data on country-level, we first load country vector data, and download the data according to the spatial extent of the countries included in the survey. The ISSP has a diverse membership from North and South America, Europe, Africa, and Asia. Thus, we can work with a global spatial extent when downloading the EO indicator.
+To access the data, we need an ECMWF account. Utilizing the `ecmwfr` package, we can access the data directly in `R`. Given that we want to aggregate the data at the country level, we first load country vector data and download the data according to the spatial extent of the countries included in the survey. The ISSP has a diverse membership from North and South America, Europe, Africa, and Asia. Thus, we can work with a global spatial extent when downloading the EO indicator.
 
 We also need some packages to load and prepare the world map and process the raster files (`rnaturalearth`, `sf`, `terra`, and `tidyverse`). We also need the `keyring` package to safely store our ECMWF-API key.
 
@@ -154,7 +154,7 @@ plot(sf::st_geometry(world))
 
 ## Accessing the Copernicus API
 
-A final step before we can access the data from the Copernicus API is to store our API key. By setting it to `"wf_api_key"`, the function automatically retrieves the key.
+A final step before we can access the data from the Copernicus API is to store our API key. The function automatically retrieves the key by setting it to `"wf_api_key"`.
 
 ```{r}
 #| eval: false
@@ -166,7 +166,7 @@ api_key <- Sys.getenv("WF_API_KEY")
 keyring::key_set_with_value(service = "wf_api_key", password = api_key)
 ```
 
-Now we can access the data. We loop the download over the four years of the survey programme (1993, 2000, 2010, 2020) in order to create four separate files.
+Now we can access the data. We loop the download over the four years of the survey program (1993, 2000, 2010, 2020) to create four separate files.
 
 ## Downloading the data
 
@@ -208,7 +208,7 @@ for (yr in c("1993", "2000", "2010", "2020")) {
 
 ## Importing the data
 
-Importing the data into `R` should feel natural for us by now. We simply use `terra::rast()` for this endevaour.
+Importing the data into `R` should feel natural to us right now. We simply use `terra::rast()` for this endevaour.
 
 ```{r}
 #| eval: false
@@ -228,7 +228,7 @@ temp_2020 <- terra::rast("../../data/EO_data/C3S_data/era5_temperature2020.grib"
 
 ## Inspecting the data
 
-Let’s inspect the datacube for 2020 and plot the first layer of the 2020 datacube (January 2020). The attributes of the file tell us information on the dimensions (number of rows, columns, and layers), the resolution, spatial extent, the coordinate reference system, units, and time points.
+Let's inspect the datacube for 2020 and plot the first layer of the 2020 datacube (January 2020). The file's attributes tell us information on the dimensions (number of rows, columns, and layers), the resolution, spatial extent, the coordinate reference system, units, and time points.
 
 :::: columns
 ::: {.column width="50%"}
@@ -247,7 +247,7 @@ plot(temp_2020[[1]])
 
 ## Aggregating to the country level
 
-Now we can aggregate the monthly values by year and country. We will check that our country polygons and the raster files have the same CRS and align, if necessary.
+Now, we can aggregate the monthly values by year and country. If necessary, we will check that our country polygons and the raster files have the same CRS and align.
 
 ```{r}
 for (yr in c("1993", "2000", "2010", "2020")) {
@@ -279,7 +279,7 @@ for (yr in c("1993", "2000", "2010", "2020")) {
 
 ## The result
 
-We now have our country polygon vector file with yearly mean temperatures for each of the survey year.
+We now have our country polygon vector file with yearly mean temperatures for each survey year.
 
 ```{r}
 head(world, 2)
@@ -353,7 +353,7 @@ temp_base <-
 
 ## Aggregating to the country level
 
-We also aggregate these data to the country level and add it to our country polygon vector data.
+We also aggregate these data at the country level and add them to our country polygon vector data.
 
 ```{r}
 #| eval: false
@@ -475,7 +475,7 @@ ggplot(data = world) +
 
 ## Let's use these data
 
-Remember, our question was whether temperature deviations from a baseline period (1961-1990) in the survey year corresponds with the overall climate concern within a country. We can assess this question, e.g., by aggregating the survey data as follows. Note that we create a within-country z-standardized measure for climate concern along the way.
+Remember, our question was whether temperature deviations from a baseline period (1961-1990) in the survey year correspond with the overall climate concern within a country. We can assess this question, e.g., by aggregating the survey data as follows. Note that we create a within-country z-standardized measure for climate concern along the way.
 
 :::: columns
 ::: {.column width="50%"}
@@ -531,7 +531,7 @@ issp_aggregated
 
 ## Structurally harmonzing the world data
 
-Formally, the ISSP data are now in an aggregated long format. We have to wrangle our world data including the temperature measures in order to have both datasets harmonized. Note that this time we z-standardize temperature differences across the whole period and countries, as they do not differ within countries in a specific year.
+Formally, the ISSP data are now in an aggregated long format. We have to wrangle our world data, including the temperature measures, to harmonize both datasets. Note that we z-standardize temperature differences across the whole period and countries this time, as they do not differ within countries in a specific year.
 
 :::: columns
 ::: {.column width="50%"}
@@ -587,7 +587,7 @@ world_restructured
 
 ## Linking the data
 
-We can now link both datasets to retreive a final dataset that we can analyze. We also convert it to the long format for plotting.
+We can now link both datasets to retrieve a final dataset we can analyze. We also converted it to a long format for plotting.
 
 ```{r}
 issp_linked <-
@@ -612,4 +612,8 @@ issp_linked |>
   scale_x_continuous(breaks = issp_linked$year) +
   theme_bw()
 ```
+
+## Exercise?
+
+![](../img/cat_quality.webp){width="45%" fig-align="center"}
 
