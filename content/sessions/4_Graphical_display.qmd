@@ -38,13 +38,9 @@ course_content |>
 
 ## What is `ggplot2`?
 
-`ggplot2` is well-known for creating plots. Thanks to the `sf` and `terra` packages, we can exploit all amazing `ggplot2` functions.
+In general, `ggplot2` is well-suited for **multi-dimensional data** like raster layers and stacks.
 
-In general, on `ggplot2`:
-
-- Well-suited for multi-dimensional data
-- Expects data (frames) as input
-- Components of the plot are added as layers
+Components of the plot are added as layers.
 
 ```{r eval=FALSE}
 #| eval: false
@@ -59,7 +55,6 @@ If you are new to `ggplot2`, you might want to check out:
 
 - [ggplot2 - Elegant Graphics for Data Analysis](https://www.springer.com/gp/book/9783319242750) by Hadley Wickham
 - [BBC Visual and Data Journalism cookbook for R graphics](https://bbc.github.io/rcookbook/#how_to_create_bbc_style_graphics)
-- [ggplot2 extensions](http://www.ggplot2-exts.org/gallery/)
 
 
 ## Components of a Plot
@@ -82,7 +77,7 @@ plot_call +
   facets
 ```
 
-## Plotting vector data
+## Recap: Plotting vector data
 
 Load the data
 
@@ -173,8 +168,6 @@ ggplot() +
 ::::
 
 ## Add the `aesthetics` 
-
-Let's assume we want to map the e-car share at the district level.
 
 Are you having trouble choosing the right color? Some excellent tutorials exist, f.e, by [Michael Toth](https://michaeltoth.me/a-detailed-guide-to-ggplot-colors.html).
 
@@ -394,7 +387,13 @@ You can perfectly use `ggplot2` to create maps with raster data. There are sever
 library(tidyterra)
 
 # Create random raster
-r <- terra::rast(nrows = 50, ncols = 50, xmin = 0, xmax = 10, ymin = 0, ymax = 10)
+r <- terra::rast(nrows = 50, 
+                 ncols = 50, 
+                 xmin = 0, 
+                 xmax = 10, 
+                 ymin = 0, 
+                 ymax = 10
+                 )
 terra::values(r) <- runif(terra::ncell(r))
 
 # Plot with tidyterra::geom_spatraster
@@ -468,7 +467,9 @@ Let's transform it into ETRS89/UTM 32N (EPSG: 25832). You will detect a slight a
 ```{r}
 #| eval: false
 #| fig.asp: .8
-ger_pop_2020 <- terra::project(ger_pop_2020, "EPSG:25832")
+ger_pop_2020 <- terra::project(ger_pop_2020, 
+                               "EPSG:25832"
+                               )
 
 terra::plot(ger_pop_2020)
 ```
@@ -546,7 +547,7 @@ ggplot()+
 
 ## Let's turn to `ggplot`
 
-Add labels
+Adjust the color scheme
 
 :::: columns
 ::: {.column width="50%"}
@@ -555,15 +556,9 @@ Add labels
 #| fig.asp: 1
 ggplot()+
   geom_spatraster(data = ger_pop_2020)+
-  scale_fill_whitebox_c(
-    palette = "muted",
+  scale_fill_viridis_c(
     n.breaks = 12,
     guide = guide_legend(reverse = TRUE)
-  )+
-  labs(
-    fill = "Population\ncount",
-    title = "Estimated population of Germany in 2020",
-    subtitle = "Approx. 100x100m grid"
   )
 ```
 :::
@@ -574,15 +569,52 @@ ggplot()+
 #| fig.asp: 1
 ggplot()+
   geom_spatraster(data = ger_pop_2020)+
-  scale_fill_whitebox_c(
-    palette = "muted",
+  scale_fill_viridis_c(
+    n.breaks = 12,
+    guide = guide_legend(reverse = TRUE)
+  )
+```
+:::
+::::
+
+
+## Let's turn to `ggplot`
+
+Add labels
+
+:::: columns
+::: {.column width="50%"}
+```{r}
+#| eval: false
+#| fig.asp: 1
+ggplot()+
+  geom_spatraster(data = ger_pop_2020)+
+  scale_fill_viridis_c(
     n.breaks = 12,
     guide = guide_legend(reverse = TRUE)
   )+
   labs(
     fill = "Population\ncount",
     title = "Estimated population of Germany in 2020",
-    subtitle = "Approx. 100x100m grid"
+    subtitle = "Approx. 1km grid"
+  )
+```
+:::
+
+::: {.column width="50%"}
+```{r}
+#| echo: false
+#| fig.asp: 1
+ggplot()+
+  geom_spatraster(data = ger_pop_2020)+
+  scale_fill_viridis_c(
+    n.breaks = 12,
+    guide = guide_legend(reverse = TRUE)
+  )+
+  labs(
+    fill = "Population\ncount",
+    title = "Estimated population of Germany in 2020",
+    subtitle = "Approx. 1km grid"
   )
 ```
 :::
@@ -591,12 +623,12 @@ ggplot()+
 
 ## Exercise 4_1: A simple map
 
-[Exercise](https://stefanjuenger.github.io/gesis-workshop-geospatial-techniques-R-2025/exercises/5_2_The_Perfect_Map.html)
+![](../img/cat_measure.png){fig-align="center" width="50%"}
 
 
 ## Case study: Population dynamics
 
-We will now dig deeper into population dynamics. We load a second layer which records the population size twenty years earlier - in 2000. We compare dimensions of both layers - they match.
+We will now dig deeper into population dynamics. We load a **second layer** which records the population size twenty years earlier - in 2000. We compare dimensions of both layers: they match.
 
 ```{r}
 ger_pop_2000 <- terra::rast("../../data/deu_ppp_2000_1km_Aggregated.tif") |> 
@@ -609,13 +641,13 @@ ger_pop_2020
 
 ## Case study: Population dynamics
 
-We calculate simple differences for each cell between 2020 and 2000 to detect increases and decreases in population sizes. 
+We calculate simple differences for each cell between 2020 and 2000 to detect increases and decreases in estimated population per cell. 
 
 :::: columns
 ::: {.column width="50%"}
 ```{r}
 #| eval: false
-#| fig.asp: 1
+#| fig.asp: 0.8
 ger_pop_diff <- ger_pop_2020 - ger_pop_2000
 
 terra::plot(ger_pop_diff)
@@ -625,7 +657,7 @@ terra::plot(ger_pop_diff)
 ::: {.column width="50%"}
 ```{r}
 #| echo: false
-#| fig.asp: 1
+#| fig.asp: 0.8
 ger_pop_diff <- ger_pop_2020 - ger_pop_2000
 
 terra::plot(ger_pop_diff)
@@ -636,13 +668,13 @@ terra::plot(ger_pop_diff)
 
 ## Case study: Population dynamics
 
-The state (Bundesland) of North Rhine-Westphalia looks quite interesting with regions experienced growth as well decline. We want to zoom into that region and explore dynamics within and between districts (Kreise).
+The state (Bundesland) of North Rhine-Westphalia looks quite interesting. The state has both growth and decline regions. We zoom into that region and explore dynamics within and between districts (Kreise).
 
 :::: columns
 ::: {.column width="50%"}
 ```{r}
 #| eval: false
-#| fig.asp: 1
+#| fig.asp: 0.8
 NRW_districts <- sf::read_sf("../../data/VG250_KRS.shp") |> 
   filter(SN_L == "05")
   
@@ -654,7 +686,7 @@ ggplot(NRW_districts)+
 ::: {.column width="50%"}
 ```{r}
 #| echo: false
-#| fig.asp: 1
+#| fig.asp: 0.8
 NRW_districts <- sf::read_sf("../../data/VG250_KRS.shp") |> 
   filter(SN_L == "05")
   
@@ -667,13 +699,13 @@ ggplot(NRW_districts)+
 
 ## Case study: Population dynamics
 
-The state (Bundesland) of North Rhine-Westphalia looks quite interesting with regions experienced growth as well decline. We want to zoom into that region and explore dynamics within and between districts (Kreise).
+The state (Bundesland) of North Rhine-Westphalia looks quite interesting. The state has both growth and decline regions. We zoom into that region and explore dynamics within and between districts (Kreise).
 
 :::: columns
 ::: {.column width="50%"}
 ```{r}
 #| eval: false
-#| fig.asp: 1
+#| fig.asp: 0.8
 # Subset pop data to spatial extent of NRW
 NRW_pop_diff <- terra::crop(
   ger_pop_diff,
@@ -694,7 +726,7 @@ ggplot()+
 ::: {.column width="50%"}
 ```{r}
 #| echo: false
-#| fig.asp: 1
+#| fig.asp: 0.8
 # Subset pop data to spatial extent of NRW
 NRW_pop_diff <- terra::crop(
   ger_pop_diff,
@@ -722,7 +754,7 @@ We are now working with diverging values +/-0. The color palette should reflect 
 ::: {.column width="50%"}
 ```{r}
 #| eval: false
-#| fig.asp: 1
+#| fig.asp: 0.8
 ggplot()+
   geom_spatraster(data = NRW_pop_diff)+
   geom_sf(data = NRW_districts,
@@ -736,7 +768,7 @@ ggplot()+
 ::: {.column width="50%"}
 ```{r}
 #| echo: false
-#| fig.asp: 1
+#| fig.asp: 0.8
 ggplot()+
   geom_spatraster(data = NRW_pop_diff)+
   geom_sf(data = NRW_districts,
@@ -757,7 +789,7 @@ We are now working with diverging values +/-0. The color palette should reflect 
 ::: {.column width="50%"}
 ```{r}
 #| eval: false
-#| fig.asp: 1
+#| fig.asp: 0.8
 # Identify max and min to adjust for skewness of positive and negative values
 max_val <- max(abs(minmax(NRW_pop_diff)))
 
@@ -767,14 +799,17 @@ ggplot()+
           fill = "transparent",
           color = "black",
           size = 3)+
-  scale_fill_distiller(type = "div", palette = "PuOr", limits = c(-max_val, max_val))
+  scale_fill_distiller(type = "div", 
+                       palette = "PuOr", 
+                       limits = c(-max_val, max_val)
+                       )
 ```
 :::
 
 ::: {.column width="50%"}
 ```{r}
 #| echo: false
-#| fig.asp: 1
+#| fig.asp: 0.8
 # Identify max and min to adjust for skewness of positive and negative values
 max_val <- max(abs(minmax(NRW_pop_diff)))
 
@@ -784,7 +819,10 @@ ggplot()+
           fill = "transparent",
           color = "black",
           size = 3)+
-  scale_fill_distiller(type = "div", palette = "PuOr", limits = c(-max_val, max_val))
+  scale_fill_distiller(type = "div", 
+                       palette = "PuOr", 
+                       limits = c(-max_val, max_val)
+                       )
 ```
 :::
 ::::
@@ -798,7 +836,7 @@ We are now working with diverging values +/-0. The color palette should reflect 
 ::: {.column width="50%"}
 ```{r}
 #| eval: false
-#| fig.asp: 1
+#| fig.asp: 0.8
 # Or define manually for even greater control
 ggplot()+
   geom_spatraster(data = NRW_pop_diff)+
@@ -818,7 +856,7 @@ ggplot()+
 ::: {.column width="50%"}
 ```{r}
 #| echo: false
-#| fig.asp: 1
+#| fig.asp: 0.8
 # Or define manually for even greater control
 ggplot()+
   geom_spatraster(data = NRW_pop_diff)+
@@ -862,14 +900,18 @@ We also want to add text labels for the two districts with the highest populatio
 ::: {.column width="50%"}
 ```{r}
 #| eval: false
-#| fig.asp: 1
+#| fig.asp: 0.8
 ggplot()+
   geom_spatraster(data = NRW_pop_diff)+
   geom_sf(data = NRW_districts,
           fill = "transparent",
           color = "black",
           size = 3)+
-  geom_sf_text(data = extremes, aes(label = GEN), size = 4, color = "black")+ 
+  geom_sf_text(data = extremes, 
+               aes(label = GEN), 
+               size = 4, 
+               color = "black"
+               )+ 
   scale_fill_gradient2(
     low = "#2d004b",
     mid = "white",
@@ -882,14 +924,18 @@ ggplot()+
 ::: {.column width="50%"}
 ```{r}
 #| echo: false
-#| fig.asp: 1
+#| fig.asp: 0.8
 ggplot()+
   geom_spatraster(data = NRW_pop_diff)+
   geom_sf(data = NRW_districts,
           fill = "transparent",
           color = "black",
           size = 3)+
-  geom_sf_text(data = extremes, aes(label = GEN), size = 4, color = "black")+ 
+  geom_sf_text(data = extremes, 
+               aes(label = GEN), 
+               size = 4, 
+               color = "black"
+               )+ 
   scale_fill_gradient2(
     low = "#2d004b",
     mid = "white",
@@ -909,7 +955,7 @@ I prefer labels instead of text
 ::: {.column width="50%"}
 ```{r}
 #| eval: false
-#| fig.asp: 1
+#| fig.asp: 0.8
 library(ggrepel)
 
 ggplot()+
@@ -942,7 +988,7 @@ ggplot()+
 ::: {.column width="50%"}
 ```{r}
 #| echo: false
-#| fig.asp: 1
+#| fig.asp: 0.8
 library(ggrepel)
 
 ggplot()+
@@ -976,17 +1022,13 @@ ggplot()+
 
 ## Case study: Population dynamics
 
-Let's do some final polishing:
-- Turn NAs transparent
-- Add arrow and scale bar
-- Final adjustments to theme
-- Title, subtitle and caption
+Let's do some final polishing: 1. Turn **NAs** transparent, 2. add **arrow** and **scale bar**, 3. make final adjustments to the **theme**, and 4. adjust **title, subtitle and caption**.
 
 :::: columns
 ::: {.column width="50%"}
 ```{r}
 #| eval: false
-#| fig.asp: 1
+#| fig.asp: 0.8
 library(ggspatial)
 
 ggplot()+
@@ -1039,7 +1081,7 @@ ggplot()+
 ::: {.column width="50%"}
 ```{r}
 #| echo: false
-#| fig.asp: 1
+#| fig.asp: 0.8
 library(ggspatial)
 
 ggplot()+
@@ -1093,14 +1135,16 @@ ggplot()+
 
 ## Beyond raw cell values: Contours
 
-Let's zoom into Cologne to explore the geom_spatraster options a bit further
+Let's zoom into Cologne to explore the `geom_spatraster()` options a bit further.
 
 :::: columns
 ::: {.column width="50%"}
 ```{r}
 #| eval: false
 #| fig.asp: 1
-cologne_bbox <- st_bbox(NRW_districts |> filter(GEN == "Köln"))
+cologne_bbox <- st_bbox(NRW_districts |> 
+                          filter(GEN == "Köln")
+                        )
 
 # Subset pop data to spatial extent of Cologne
 koeln_pop_2020 <- terra::crop(
@@ -1118,8 +1162,10 @@ ggplot()+
           color = "white",
           size = 8)+
   coord_sf(
-    xlim = c(cologne_bbox["xmin"], cologne_bbox["xmax"]),
-    ylim = c(cologne_bbox["ymin"], cologne_bbox["ymax"]),
+    xlim = c(cologne_bbox["xmin"], 
+             cologne_bbox["xmax"]),
+    ylim = c(cologne_bbox["ymin"], 
+             cologne_bbox["ymax"]),
     expand = FALSE
   )+
   theme_minimal()+
@@ -1133,7 +1179,9 @@ ggplot()+
 ```{r}
 #| echo: false
 #| fig.asp: 1
-cologne_bbox <- st_bbox(NRW_districts |> filter(GEN == "Köln"))
+cologne_bbox <- st_bbox(NRW_districts |> 
+                          filter(GEN == "Köln")
+                        )
 
 # Subset pop data to spatial extent of Cologne
 koeln_pop_2020 <- terra::crop(
@@ -1151,8 +1199,10 @@ ggplot()+
           color = "white",
           size = 8)+
   coord_sf(
-    xlim = c(cologne_bbox["xmin"], cologne_bbox["xmax"]),
-    ylim = c(cologne_bbox["ymin"], cologne_bbox["ymax"]),
+    xlim = c(cologne_bbox["xmin"], 
+             cologne_bbox["xmax"]),
+    ylim = c(cologne_bbox["ymin"], 
+             cologne_bbox["ymax"]),
     expand = FALSE
   )+
   theme_minimal()+
@@ -1175,7 +1225,9 @@ Let's zoom into Cologne to explore the geom_spatraster options a bit further
 #| fig.asp: 1
 # Plot contour
 ggplot()+
-  geom_spatraster_contour_filled(data = koeln_pop_2020)+
+  geom_spatraster_contour_filled(
+    data = koeln_pop_2020
+    )+
   scale_fill_viridis_d(
     guide = guide_legend(reverse = TRUE)
   )+
@@ -1184,8 +1236,10 @@ ggplot()+
           color = "white",
           size = 8)+
   coord_sf(
-    xlim = c(cologne_bbox["xmin"], cologne_bbox["xmax"]),
-    ylim = c(cologne_bbox["ymin"], cologne_bbox["ymax"]),
+    xlim = c(cologne_bbox["xmin"], 
+             cologne_bbox["xmax"]),
+    ylim = c(cologne_bbox["ymin"], 
+             cologne_bbox["ymax"]),
     expand = FALSE
   )+
   theme_minimal()+
@@ -1201,7 +1255,8 @@ ggplot()+
 #| fig.asp: 1
 # Plot contour
 ggplot()+
-  geom_spatraster_contour_filled(data = koeln_pop_2020)+
+  geom_spatraster_contour_filled(
+    data = koeln_pop_2020)+
   scale_fill_viridis_d(
     guide = guide_legend(reverse = TRUE)
   )+
@@ -1210,8 +1265,10 @@ ggplot()+
           color = "white",
           size = 8)+
   coord_sf(
-    xlim = c(cologne_bbox["xmin"], cologne_bbox["xmax"]),
-    ylim = c(cologne_bbox["ymin"], cologne_bbox["ymax"]),
+    xlim = c(cologne_bbox["xmin"], 
+             cologne_bbox["xmax"]),
+    ylim = c(cologne_bbox["ymin"], 
+             cologne_bbox["ymax"]),
     expand = FALSE
   )+
   theme_minimal()+
@@ -1224,4 +1281,4 @@ ggplot()+
 
 ## Exercise 4_2: A fancy map
 
-[Exercise](https://stefanjuenger.github.io/gesis-workshop-geospatial-techniques-R-2025/exercises/5_2_The_Perfect_Map.html)
+![](../img/cat_quality.png){fig-align="center" width="50%"}

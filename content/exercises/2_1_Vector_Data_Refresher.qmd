@@ -26,55 +26,41 @@ Let’s get started and have some fun with spatial data! 🌍✨
 ::: callout-note
 ## `r emo::ji("weight_lifting_man")` Exercise 1
 
-Import a polygon vector shapefile from the `./data` folder.
-After loading, take a moment to explore it:
-How many features are there? What attributes are included? What is the coordinate reference system (CRS)?
-Feel free to also plot the data and have a first visual look at it!
+Import a polygon vector shapefile from the `./data` folder. After loading, take a moment to explore it: How many features are there? What attributes are included? What is the coordinate reference system (CRS)? Feel free to also plot the data and have a first visual look at it!
 :::
 
 ::: {.callout-caution collapse="true"}
 ## `r emo::ji("bulb")` Tip
 
 Shapefiles include a file with the extension `.shp`. You can use the `sf` package and the `sf::st_read()` function to import the data. Hint: If you want a cleaner output, you can set `quiet = TRUE`.
-
 :::
 
 ::: callout-note
 ## `r emo::ji("weight_lifting_man")` Exercise 2
 
-Import the file `synthetic_coordinates.csv` from the `./data` folder.
-It contains point coordinates, but it’s not yet an `sf` object!
-After loading, convert it into a proper spatial object by assigning coordinates and a CRS.
-(Feel free to plot the points afterward if you like!)
-
+Import the file `synthetic_coordinates.csv` from the `./data` folder. It contains point coordinates, but it’s not yet an `sf` object! After loading, convert it into a proper spatial object by assigning coordinates and a CRS. (Feel free to plot the points afterward if you like!)
 :::
 
 ::: {.callout-caution collapse="true"}
 ## `r emo::ji("bulb")` Tip
 
-First, read the table using `read.csv()` or `readr::read_csv()`.
-Then use `sf::st_as_sf()` to create a spatial object, specifying the coordinate columns and CRS (e.g., 4326 for WGS84 if needed).
-
+First, read the table using `read.csv()` or `readr::read_csv()`. Then use `sf::st_as_sf()` to create a spatial object, specifying the coordinate columns and CRS (e.g., 4326 for WGS84 if needed).
 :::
 
 ::: callout-note
-
 ## `r emo::ji("weight_lifting_man")` Exercise 3
 
 Let’s connect the two datasets you imported! Join the points from `synthetic_coordinates.csv` with the polygons you loaded earlier, adding the `AGS` column from the polygon dataset to the points.
-
 :::
 
 ::: {.callout-caution collapse="true"}
 ## `r emo::ji("bulb")` Tip
 
-Beware:
-The coordinate reference systems (CRS) of the two datasets are different!
-Make sure they match before trying to perform the spatial join — otherwise, you might get an error (and that’s totally fine — part of the learning!).
+Beware: The coordinate reference systems (CRS) of the two datasets are different! Make sure they match before trying to perform the spatial join — otherwise, you might get an error (and that’s totally fine — part of the learning!).
 
-- Check the CRS of both datasets with `sf::st_crs()`.
-- Use `sf::st_transform()` to bring one dataset into the CRS of the other.
-- For the join, you can use `sf::st_join()`.
+-   Check the CRS of both datasets with `sf::st_crs()`.
+-   Use `sf::st_transform()` to bring one dataset into the CRS of the other.
+-   For the join, you can use `sf::st_join()`.
 
 You could also transform the polygons instead of the points — it depends on what fits better. Always double-check that geometries line up properly after transformation (e.g., by plotting)!
 :::
@@ -159,9 +145,7 @@ points_sf <-
 # Optional: visualize it!
 plot(points_sf)
 ```
-
 :::
-
 
 ::: {.callout-tip collapse="true"}
 ## `r emo::ji("white_check_mark")` Solution 3
@@ -181,5 +165,4 @@ points_with_AGS <- sf::st_join(points_transformed, polygon_data[, "AGS"])
 # Check result
 head(points_with_AGS)
 ```
-
 :::

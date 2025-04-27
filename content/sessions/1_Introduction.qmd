@@ -23,9 +23,11 @@ This course will teach you how to exploit `R` and apply its geospatial technique
 
 By the end of this course, you should...
 
--   Be comfortable with using raster data in `R`
--   Including importing and wrangling raster layers
--   Be able to create maps based on your very own processed data in `R`
+-   Be comfortable with using **raster data** in `R`
+-   Including importing and wrangling single **raster layers** as well as **raster stacks and cubes**
+-   Have a fundamental understanding of **spatial geometries** and how these are manipulated in `R`  
+-   Be able to create publication-ready **maps** of raster layers and stacks
+-   Not be afraid to explore access to **remote sensing APIs** for your own research questions
 
 ------------------------------------------------------------------------
 
@@ -60,7 +62,7 @@ We will show the use of packages we exploit in practice
 :::
 
 ::: {.column width="60%"}
-![](../img/rstudio-shop.jpg){fig-align="center" width="75%"}
+![](../img/rstudio-shop.jpg){fig-align="center" width="60%"}
 :::
 :::::
 
@@ -128,7 +130,7 @@ We will show the use of packages we exploit in practice
 -   Where do you work/research?
 -   What are you working on/researching?
 -   What is your experience with `R` or other programming languages?
--   Do you already have experience with geospatial data?
+-   What is your experience with geospatial data?
 :::
 
 ::: {.column width="60%"}
@@ -152,14 +154,14 @@ course_content |>
   kableExtra::row_spec(1, background = "yellow")
 ```
 
-## Relevance of geospatial data in social sciences
+## Geospatial data in social sciences
 
 A growing interest in economics and the social sciences in geospatial and Earth 
 observation data has led to a broad spectrum of publications in recent years. We have
 identified four major subject areas which have been addressed with EO data recently:
 
 ::::: columns
-::: {.column width="50%"}
+::: {.column width="40%"}
 - Environmental attitudes and behavior,
 - Economic development and inequality,
 - Conflict and migration,
@@ -167,26 +169,81 @@ identified four major subject areas which have been addressed with EO data recen
 
 :::
 
-::: {.column width="50%"}
-![](../img/lohmann_kontoleon_2023.png){fig-align="center" width="80%"}
+::: {.column width="60%"}
+![](../img/lohmann_kontoleon_2023.png){fig-align="center" width="60%"}
 <small>[Lohmann & Kontoleon 2023](https://link.springer.com/article/10.1007/s10640-023-00796-0)</small>
 
 :::
 :::::
 
 
-## Relevance of geospatial data in social sciences
+## Geospatial data in social sciences
 
 ::::: columns
 ::: {.column width="50%"}
-Increased amount of available data
+[Hoffmann et al. 2022](https://doi.org/10.1038/s41558-021-01263-8) analyse how the experience of climate anomalies and extremes influences environmental attitudes and vote intention in Europe
+
+- Data integration of 1. harmonized Eurobarometer data, 2. EU parliamentary electoral data, and 3. climatological data
+- Aggregation on regional levels (NUTS-2 and NUTS-3)
+- Climatological data from ERA5 reanalysis (CS3)
+- Calculations of temperature anomalies and extremes based on reference period (1971-2000) 
+- Findings suggest effect of temperature anomalies (heat, "dry spell") on environmental concern and vote intention
+:::
+
+::: {.column width="50%"}
+![](../img/Hoffmann_et_al_2022.png){fig-align="center" width="80%"}
+:::
+:::::
+
+## Geospatial data in social sciences
+
+::::: columns
+::: {.column width="50%"}
+![](../img/Garcia-Leon_et_al_2021.png){fig-align="center" width="80%"}
+:::
+
+::: {.column width="50%"}
+[García-León et al. 2021](https://doi.org/10.1038/s41467-021-26050-z) investigate historical and future economic impacts of recent heatwaves (2003, 2010, 2015, 2018) in Europe
+
+- Data integration of 1. heatwave data with 2. population data, and 3. worker productivity data, 4. economic accounts from Eurostat.
+- Aggregation on regional levels
+- Temperature data from ERA5 reanalysis
+- Calculations of heatwaves based on reference period (1981-2010) 
+- Findings indicate total estimated damages attributed to heatwaves to 0.3-0.5% of European GDP with high spatial variation (GDP impacts beyond 1% in vulnerable regions)
+:::
+:::::
+
+
+## Geospatial data in social sciences
+
+::::: columns
+::: {.column width="50%"}
+[Jean et al. 2016](https://doi.org/10.1126/science.aaf7894) show how nighttime maps can be utilized as estimates of household consumption and assets
+
+- Economic indicators are hard to measure in poorer countries - satellite imagery could be an alternative proxy for it
+- The authors integrate 1. survey data (World Bank’s Living Standards Measurement Surveys - LSMS; and Demographic and Health Surveys - DHS) with 2. nighttime light data in five African countries - Nigeria, Tanzania, Uganda, Malawi, and Rwanda
+- ML approach for image feature extraction in nighttime maps
+- Daytime satellite images from Google Static Maps, nighttime lights from US DMSP
+- Model can explain up to 75% of variation in local-level economic outcomes
+:::
+
+::: {.column width="50%"}
+![](../img/Jean_et_al_2016.png){fig-align="center" width="80%"}
+:::
+:::::
+
+
+## Geospatial data in social sciences
+
+::::: columns
+::: {.column width="50%"}
+Increased amount of **available data**
 
 -   Quantitative and on a small spatial scale
 -   Often open source and free access
 
-Better tools
+Better **tools**
 
--   Personal computers with enough horsepower
 -   Standard software, such as `R`, can be used as Geographic Information System (GIS)
 
 :::
@@ -199,18 +256,23 @@ Better tools
 
 ## Geospatial data in this course I
 
-In the folder called `./data`, you can find (most of) the data files prepped for all the exercises and slides. The following data are included:
+In the folder called `./data`, you can find (most of) the data files prepared for all the exercises and slides. The following data are included:
 
 - Administrative borders of Germany (Prefix *VG250\_*) are provided by the German [Federal Agency for Cartography and Geodesy](http://www.bkg.bund.de) (2018). Check out their [Open Data Portal](https://gdz.bkg.bund.de/index.php/default/open-data.html).
 
 - German Census 2022 data are provided by the [Federal Statistical Office Germany, Wiesbaden 2024](https://www.zensus2022.de). We used our colleague [Jonas Lieth](https://www.gesis.org/institut/ueber-uns/mitarbeitendenverzeichnis/person/Jonas.Lieth)'s (experimental) `R`package [`z22`](https://github.com/JsLth/z22) to gather the data for you. If you're stuck using the data, `z22::z22_categories()` may help you (e.g., `z22::z22_categories("foreigners)`).
 
-- WorldPop data are provided by a [research group based at the University of Southampton](https://www.worldpop.org/), offering high-resolution, open-access data on population distribution and demographics. The datasets combine census information, satellite imagery, and statistical modeling to support research, policy-making, and humanitarian efforts worldwide.
-
 
 ## Geospatial data in this course II
 
+- WorldPop data are provided by a [research group based at the University of Southampton](https://www.worldpop.org/), offering high-resolution, open-access data on population distribution and demographics. The datasets combine census information, satellite imagery, and statistical modeling to support research, policy-making, and humanitarian efforts worldwide.
+
+- Nighttime lights are derived from [NASA's Black Marble](https://blackmarble.gsfc.nasa.gov/) (Prefix *VNP46A4_*). The data has been accessed with Robert Marty's and Gabriel Stefanini Vicente's (2025) [blackmarbler](https://worldbank.github.io/blackmarbler/) package.
+
 - ERA5 is provided by the [Copernicus Climate Change Service](https://climate.copernicus.eu/) (C3S) and offers high-resolution, global reanalysis data on atmospheric, land, and oceanic variables. The datasets combine observations with models to produce consistent climate information used for research, forecasting, and environmental monitoring.
+
+
+## Geospatial data in this course III
 
 - The International Social Survey Programme (ISSP) [available at GESIS](https://search.gesis.org/research_data/ZA7650) is provided by a cross-national collaboration of research organizations, delivering annual survey data on social attitudes and behaviors. The datasets cover a wide range of topics like work, family, environment, and social inequality, supporting comparative social science research worldwide.
 
@@ -218,31 +280,6 @@ In the folder called `./data`, you can find (most of) the data files prepped for
 
 **Please make sure that if you reuse any of the provided data to cite the original data sources.**
 
-
-## Packages in this course I
-
-We will use plenty of different packages during the course, but only a few are our main drivers (e.g., the `sf` package). Here's the list of packages you may need for the exercises:
-
--   [`dplyr`](https://cran.r-project.org/web/packages/dplyr/index.html)
--   [`ggplot2`](https://cran.r-project.org/web/packages/ggplot2/index.html)
--   [`ggspatial`](https://cran.r-project.org/web/packages/ggspatial/index.html)
--   [`osmdata`](https://cran.r-project.org/web/packages/osmdata/index.html)
--   [**`OpenStreetMap`**](https://cran.r-project.org/web/packages/OpenStreetMap/index.html)[^3]
--   [`sf`](https://cran.r-project.org/web/packages/sf/index.html)
--   [`spatialreg`](https://cran.r-project.org/web/packages/spatialreg/index.html)
-
-[^3]: If you use a Mac, you may need to install Java: https://www.java.com/de/download/
-
-## Packages in this course II
-
--   [`spatstat`](https://cran.r-project.org/web/packages/spatstat/index.html)
--   [`sfdep`](https://cran.r-project.org/web/packages/sfdep/index.html)
--   [`spdep`](https://cran.r-project.org/web/packages/spdep/index.html)
--   [`terra`](https://cran.r-project.org/web/packages/terra/index.html)
--   [`tidygeocoder`](https://cloud.r-project.org/web/packages/tidygeocoder/index.html)
--   [`tidyterra`](https://cran.r-project.org/web/packages/tidyterra/index.html)
--   [`tmap`](https://cran.r-project.org/web/packages/tmap/index.html)
--   [`tmaptools`](https://cran.r-project.org/web/packages/tmaptools/index.html)
 
 ## Refresher: What are geospatial data?
 
@@ -252,8 +289,11 @@ Data with a direct spatial reference
 
 $\rightarrow$ **geo-coordinates** x, y (and z)
 
--   Information about geometries
--   Optional: Content in relation to the geometries
+Visualizing geometries in different styles depending on format:
+
+-   Vector data (points, lines, polygons)
+-   Raster data (grids) 
+-   Coordinate Reference System (CRS)
 :::
 
 ::: {.column width="50%"}
@@ -267,40 +307,9 @@ $\rightarrow$ **geo-coordinates** x, y (and z)
 
 ![](../img/longitude_latitude_meme.jpg){fig-align="center" width="50%"}
 
-## Refresher: What is GIS?
-
-Most common understanding: Geographic Information Systems (GIS) as specific software to process geospatial data for
-
--   Visualization
--   Analysis
--   Interpretation
-
-## Refresher: Data specifics
-
-::::: columns
-::: {.column width="50%"}
-![](../img/fig_3d_simple.png){fig-align="center" width="75%"}
-
-<small>Sources: OpenStreetMap / GEOFABRIK (2018) and City of Cologne (2014)</small>
-:::
-
-::: {.column width="50%"}
-Formats
-
--   Vector data (points, lines, polygons)
--   Raster data (grids)
-
-Coordinate reference systems (CRS)
-
--   Allow the projection on earth's surface
--   Differ in precision for specific purposes
-:::
-:::::
-
-
 ## Refresher: Types of CRS
 
-You may hear from geographic, geocentric, projected, or local CRS in your research.
+You may hear from **geographic**, **geocentric**, **projected**, or **local** CRS.
 
 What's the difference?
 
@@ -311,16 +320,12 @@ What's the difference?
 
 *In practice, what matters most is that two or more layers match when integrating them.*
 
-------------------------------------------------------------------------
-
-![](../img/layers_meme.jpg){.r-stretch fig-align="center"}
-
 
 ## Refresher: Coordinate reference system (CRS)
 
 - CRS is a reference system to determine the precise location of points in space
 - GIS programs **MUST** know CRS for accurate processing, visualization, and analysis of data
-- CRS is based on the Geographic Coordinate System (GCS) + the Projected Coordinate System (PCS)
+- CRS is based on the **Geographic Coordinate System** (GCS) + the **Projected Coordinate System** (PCS)
 
 
 ## Refresher: Geographic Coordinate System (GCS)
@@ -368,7 +373,7 @@ What's the difference?
 
 ## Refresher: Common PCS - UTM
 
-Universal Transverse Mercator (UTM) is a global map projection which:
+**Universal Transverse Mercator** (UTM) is a global map projection which:
 
 - Projects globe onto a cylinder tangent to a central meridian
 - Divides it into 60 zones
@@ -407,10 +412,11 @@ EPSG:3035
 ## Refresher: Documentation of CRS
 
 Every geodata object requires a description of the CRS
+
 - GCS and datum
 - PCS
 - x and y units (like meters)
-- Domain (maxium allowable x and y values)
+- Domain (maximum allowable x and y values)
 - Resolution
 
 
@@ -476,14 +482,50 @@ Most of the time, it's enough to use so-called EPSG Codes ("European Petroleum S
 :::
 :::::
 
-## Refresher: More details on geospatial data
 
-Let's learn about geospatial data as we learn about specific formats
+## Refresher: What is GIS?
 
-![](../img/Raster-and-Vector-data-types-as-representative-of-real-world-geographic-space_W640.jpg){.r-stretch fig-align="center"}
+Most common understanding: **Geographic Information Systems** (GIS) as specific software to process geospatial data for
 
-<p align="center">
+-   Visualization
+-   Analysis
+-   Interpretation
 
-<small>[Source](https://dx.doi.org/10.13140/2.1.3030.1767)</small>
+$\rightarrow$ In our case, of course, it is `R`
 
-</p>
+But base `R` is limited when it comes to handling geospatial data
+
+
+## Packages in this course I `r emo::ji("package")`
+
+We will use plenty of different packages during the course, but only a few are our main drivers (e.g., the `terra` package). Here's the list of packages you may need for the exercises:
+
+-   [`blackmarbler`](https://cloud.r-project.org/web/packages/blackmarbler/index.html)
+-   [`dplyr`](https://cran.r-project.org/web/packages/dplyr/index.html)
+-   [`ggplot2`](https://cran.r-project.org/web/packages/ggplot2/index.html)
+-   [`ggrepel`](https://cran.r-project.org/web/packages/ggrepel/index.html)
+-   [`ggspatial`](https://cran.r-project.org/web/packages/ggspatial/index.html)
+-   [`randomForest`](https://cran.r-project.org/web/packages/randomForest/index.html)
+-   [`readr`](https://cran.r-project.org/web/packages/readr/index.html)
+-   [`scales`](https://cran.r-project.org/web/packages/scales/index.html)
+
+
+## Packages in this course II `r emo::ji("package")`
+
+-   [`sf`](https://cran.r-project.org/web/packages/sf/index.html)
+-   [`spatialreg`](https://cran.r-project.org/web/packages/spatialreg/index.html)
+-   [`spatstat`](https://cran.r-project.org/web/packages/spatstat/index.html)
+-   [`sfdep`](https://cran.r-project.org/web/packages/sfdep/index.html)
+-   [`spdep`](https://cran.r-project.org/web/packages/spdep/index.html)
+-   [`stars`](https://cran.r-project.org/web/packages/stars/index.html)
+-   [`terra`](https://cran.r-project.org/web/packages/terra/index.html)
+-   [`tidyterra`](https://cran.r-project.org/web/packages/tidyterra/index.html)
+-   [`tigris`](https://cran.r-project.org/web/packages/tigris/index.html)
+-   [`units`](https://cran.r-project.org/web/packages/units/index.html)
+
+
+## Exercise 1_1: Package Installation
+
+![](../img/cat_scientist.png){fig-align="center" width="40%"}
+
+*AI-assisted picture*

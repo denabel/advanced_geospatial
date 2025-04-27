@@ -51,7 +51,11 @@ US_states <- states() |>
 ::: callout-note
 ## `r emo::ji("weight_lifting_man")` Exercise 3
 
-We now want to crop the raster-file on the basis of the US states bounding box: - Create a bounding box based on your shapefile, - Reproject this bbox to the CRS of the raster file, - Then crop the raster file on based on the bbox.
+We now want to crop the raster-file on the basis of the US states bounding box:
+
+- Create a bounding box based on your shapefile,
+- Reproject this bbox to the CRS of the raster file, 
+- Then crop the raster file on based on the bbox.
 :::
 
 ::: {.callout-caution collapse="true"}
@@ -147,7 +151,7 @@ terra::plot(USA_pop_2020)
 library(tigris)
 
 # Load the states and filter out non-contiguous territories
-US_states <- states() |> 
+US_states <- states(progress_bar=FALSE) |> 
   dplyr::filter(!STUSPS %in% c("AK", "AS", "GU", "HI", "MP", "PR", "VI"))
 
 plot(sf::st_geometry(US_states))
