@@ -3128,7 +3128,7 @@ vertical-align: -.125em;
 </div>
 <div class="callout-body-container callout-body">
 <p>Your first task is to import a dataset of synthetic geographic coordinates. The file is called <code>synthetic_geocoordinates.rds</code> and it’s located in the <code>./data/</code> folder.</p>
-<p>Next, choose another raster dataset from the <code>./data/z22/</code> folder to use in subsequent tasks.</p>
+<p>Next, choose another raster <code>.tif</code> dataset from the <code>./data/z22/</code> folder to use in subsequent tasks.</p>
 <p>This exercise will lay the foundation for combining vector and raster data in the next steps.</p>
 </div>
 </div>
@@ -3253,9 +3253,9 @@ vertical-align: -.125em;
 <pre><code>terra 1.8.42</code></pre>
 </div>
 <div class="cell-output cell-output-stdout">
-<pre><code>Classes &#39;sf&#39;, &#39;tbl_df&#39;, &#39;tbl&#39; and &#39;data.frame&#39;: 2000 obs. of  2 variables:
- $ id      : int  1 2 3 4 5 6 7 8 9 10 ...
- $ geometry:List of 2000
+<pre><code>Classes &#39;sf&#39;, &#39;tbl_df&#39;, &#39;tbl&#39; and &#39;data.frame&#39;: 2000 obs. of  3 variables:
+ $ id       : int  1 2 3 4 5 6 7 8 9 10 ...
+ $ geometry :List of 2000
   ..$ : &#39;XY&#39; num  4607500 3336500
   ..$ : &#39;XY&#39; num  4274500 3328500
   ..$ : &#39;XY&#39; num  4181500 3139500
@@ -3365,9 +3365,11 @@ vertical-align: -.125em;
   .. ..$ wkt  : chr &quot;PROJCRS[\&quot;ETRS89-extended / LAEA Europe\&quot;,\n    BASEGEOGCRS[\&quot;ETRS89\&quot;,\n        DATUM[\&quot;European Terrestrial R&quot;| __truncated__
   .. ..- attr(*, &quot;class&quot;)= chr &quot;crs&quot;
   ..- attr(*, &quot;n_empty&quot;)= int 0
+ $ foreigner: Named int  0 1 0 1 1 0 0 0 0 1 ...
+  ..- attr(*, &quot;names&quot;)= chr [1:2000] &quot;sample1&quot; &quot;sample2&quot; &quot;sample3&quot; &quot;sample4&quot; ...
  - attr(*, &quot;sf_column&quot;)= chr &quot;geometry&quot;
- - attr(*, &quot;agr&quot;)= Factor w/ 3 levels &quot;constant&quot;,&quot;aggregate&quot;,..: NA
-  ..- attr(*, &quot;names&quot;)= chr &quot;id&quot;</code></pre>
+ - attr(*, &quot;agr&quot;)= Factor w/ 3 levels &quot;constant&quot;,&quot;aggregate&quot;,..: NA NA
+  ..- attr(*, &quot;names&quot;)= chr [1:2] &quot;id&quot; &quot;foreigner&quot;</code></pre>
 </div>
 <div class="cell-output-display">
 <div>

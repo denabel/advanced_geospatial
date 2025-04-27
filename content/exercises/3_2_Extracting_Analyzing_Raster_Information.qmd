@@ -15,75 +15,64 @@ editor_options:
   chunk_output_type: console
 ---
 
-In this set of exercises, you'll focus on linking raster data, aggregating them to a coarser resolution, creating heatmaps using spatial smoothing, and linking processed raster data with your synthetic geocoordinates.
-You will:
+In this set of exercises, you'll focus on linking raster data, aggregating them to a coarser resolution, creating heatmaps using spatial smoothing, and linking processed raster data with your synthetic geocoordinates. You will:
 
-- Aggregate raster data to a larger grid (e.g., 5 km resolution).
-- Use a focal operation to create a heatmap and visualize spatial patterns.
-- Link the aggregated raster back to your geocoordinates for further analysis.
+-   Aggregate raster data to a larger grid (e.g., 5 km resolution).
+-   Use a focal operation to create a heatmap and visualize spatial patterns.
+-   Link the aggregated raster back to your geocoordinates for further analysis.
 
 ### Exercises
 
 ::: callout-note
 ## `r emo::ji("weight_lifting_man")` Exercise 1
 
-Your first task is to import a dataset of synthetic geographic coordinates.
-The file is called `synthetic_geocoordinates.rds` and it’s located in the `./data/` folder.
+Your first task is to import a dataset of synthetic geographic coordinates. The file is called `synthetic_geocoordinates.rds` and it’s located in the `./data/` folder.
 
-Next, choose another raster dataset from the `./data/z22/` folder to use in subsequent tasks.
+Next, choose another raster `.tif` dataset from the `./data/z22/` folder to use in subsequent tasks.
 
 This exercise will lay the foundation for combining vector and raster data in the next steps.
-
 :::
 
 ::: {.callout-caution collapse="true"}
 ## `r emo::ji("bulb")` Tip
 
-- Use `readRDS()` to load the `.rds` file.
-- To load a raster, use `terra::rast()`.
-- After loading the data, inspect the structure of the synthetic coordinates, e.g., with `str()` and check the raster’s properties with `plot()`.
-
+-   Use `readRDS()` to load the `.rds` file.
+-   To load a raster, use `terra::rast()`.
+-   After loading the data, inspect the structure of the synthetic coordinates, e.g., with `str()` and check the raster’s properties with `plot()`.
 :::
 
 ::: callout-note
 ## `r emo::ji("weight_lifting_man")` Exercise 2
 
-In this exercise, you’ll extract raster values at the locations of the synthetic coordinates you loaded previously.
-But here’s the twist: Think about the surrounding area!
+In this exercise, you’ll extract raster values at the locations of the synthetic coordinates you loaded previously. But here’s the twist: Think about the surrounding area!
 
 Use buffers or a spatial filter (like `terra::focal()`) to capture information around each point, not just at the point itself. This will help you get a broader view of the raster values in the neighborhood of your coordinates.
 
-Important:
-You may notice that the CRS of the points and the CRS of the raster don’t align. You will need to adjust the CRS of your points to match the raster's CRS to correctly extract values.
-
+Important: You may notice that the CRS of the points and the CRS of the raster don’t align. You will need to adjust the CRS of your points to match the raster's CRS to correctly extract values.
 :::
 
 ::: {.callout-caution collapse="true"}
 ## `r emo::ji("bulb")` Tip
 
-- You can use `terra::extract()` to pull raster values at specific coordinates.
-- To consider the surrounding area, use `terra::focal()` to apply a spatial filter or create buffers with `sf::st_buffer()` around your points.
-- Be creative: What size buffer makes sense for your data? Should you use a large or small neighborhood around the points? How do the values change within this window?
-
+-   You can use `terra::extract()` to pull raster values at specific coordinates.
+-   To consider the surrounding area, use `terra::focal()` to apply a spatial filter or create buffers with `sf::st_buffer()` around your points.
+-   Be creative: What size buffer makes sense for your data? Should you use a large or small neighborhood around the points? How do the values change within this window?
 :::
 
 ::: callout-note
 ## `r emo::ji("weight_lifting_man")` Exercise 3
 
-In this exercise, you’ll aggregate the raster data to a coarser grid, for example, a 5 km grid.
-Then, use a focal operation to create a heatmap, smoothing the values and representing the intensity of the raster data across the area.
+In this exercise, you’ll aggregate the raster data to a coarser grid, for example, a 5 km grid. Then, use a focal operation to create a heatmap, smoothing the values and representing the intensity of the raster data across the area.
 
 Finally, link the aggregated raster data with your synthetic geocoordinates again. This will help you to understand the spatial patterns of the raster values at different resolutions.
-
 :::
 
 ::: {.callout-caution collapse="true"}
 ## `r emo::ji("bulb")` Tip
 
-- To aggregate raster data, use `terra::aggregate()`, where you can specify the cell size.
-- Use `terra::focal()` to apply a focal operation like a moving window average, which helps smooth the data and create a heatmap effect.
-- After aggregation and smoothing, make sure to link the newly created raster back to your synthetic coordinates using `terra::extract()`.
-
+-   To aggregate raster data, use `terra::aggregate()`, where you can specify the cell size.
+-   Use `terra::focal()` to apply a focal operation like a moving window average, which helps smooth the data and create a heatmap effect.
+-   After aggregation and smoothing, make sure to link the newly created raster back to your synthetic coordinates using `terra::extract()`.
 :::
 
 ### Solutions
@@ -122,7 +111,6 @@ foreigners <- terra::rast("../../data/z22/foreigners.tif")
 # Check the raster's properties by plotting
 plot(foreigners)
 ```
-
 :::
 
 ::: {.callout-tip collapse="true"}
@@ -187,5 +175,4 @@ head(aggregated_values)
 head(foreigners_buffer_values)
 head(foreigners_focal_values)
 ```
-
 :::

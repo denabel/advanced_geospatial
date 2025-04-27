@@ -15,10 +15,9 @@ editor_options:
   chunk_output_type: console
 ---
 
-In the next three exercises, we’ll dive into the world of raster data.
-You'll practice importing different raster formats, explore the properties of spatial layers, and even create a new raster layer by combining datasets.
+In the next three exercises, we’ll dive into the world of raster data. You'll practice importing different raster formats, explore the properties of spatial layers, and even create a new raster layer by combining datasets.
 
-Along the way, you might encounter a few common challenges, like dealing with different coordinate systems. These are great opportunities to sharpen your spatial data skills! 🚀🗺️
+Along the way, you might encounter a few common challenges, like dealing with different coordinate systems. These are great opportunities to sharpen your spatial data skills!
 
 Let’s jump in!
 
@@ -27,52 +26,41 @@ Let’s jump in!
 ::: callout-note
 ## `r emo::ji("weight_lifting_man")` Exercise 1
 
-In this exercise, you’ll import a raster `.tif` file from the `./data/z22` folder.
-Once loaded, take a moment to explore the raster's dimensions, resolution, and other key properties.
-Feel free to visualize it to get an initial sense of its content!
-
+In this exercise, you’ll import a raster `.tif` file from the `./data/z22` folder. Once loaded, take a moment to explore the raster's dimensions, resolution, and other key properties. Feel free to visualize it to get an initial sense of its content!
 :::
 
 ::: {.callout-caution collapse="true"}
 ## `r emo::ji("bulb")` Tip
 
 You can use the `terra` package to load raster files. With the `terra::rast()` function, you’ll be able to load your `.tif` file and start working with it.
-
 :::
 
 ::: callout-note
 ## `r emo::ji("weight_lifting_man")` Exercise 2
 
-In this exercise, you’ll import a NetCDF file (`.nc`) from the `./data/z22` folder.
-Once you’ve successfully loaded it, check out the dimensions and variables within the file.
-This is a great chance to get familiar with different raster data file formats!
-
+In this exercise, you’ll import a NetCDF file (`.nc`) from the `./data/z22` folder. Once you’ve successfully loaded it, check out the dimensions and variables within the file. This is a great chance to get familiar with different raster data file formats!
 :::
 
 ::: {.callout-caution collapse="true"}
 ## `r emo::ji("bulb")` Tip
 
 To work with `.nc` files, you can also use the `terra` package. The `terra::rast()` function works for NetCDF files, just like for raster TIF files.
-
 :::
 
 ::: callout-note
 ## `r emo::ji("weight_lifting_man")` Exercise 3
 
 Now it’s time to get creative! 🎨 You’ve already imported both a TIF file and a NetCDF file. In this exercise, combine these two datasets to create a new raster layer. You can experiment by performing basic operations like adding, multiplying, or averaging the values from the two layers.
-
 :::
 
 ::: {.callout-caution collapse="true"}
 ## `r emo::ji("bulb")` Tip
-However, beware:
-Since the CRS of the two datasets might not match, you could encounter a warning.
-Take a moment to investigate and correct it!
 
-- Check the CRS of both datasets with `terra::crs()`.
-- If necessary, use `terra::project()` to align the CRS of both layers.
-- Once aligned, you can perform mathematical operations like +, -, *, or / on the two layers.
+However, beware: Since the CRS of the two datasets might not match, you could encounter a warning. Take a moment to investigate and correct it!
 
+-   Check the CRS of both datasets with `terra::crs()`.
+-   If necessary, use `terra::project()` to align the CRS of both layers.
+-   Once aligned, you can perform mathematical operations like +, -, \*, or / on the two layers.
 :::
 
 ### Solutions
@@ -111,7 +99,6 @@ terra::res(age_65_tif)            # Resolution
 # Optional: visualize it
 plot(age_65_tif)
 ```
-
 :::
 
 ::: {.callout-tip collapse="true"}
@@ -165,5 +152,4 @@ old_peeps <- population_nc * (age_65_tif / 100)
 # Explore the new raster layer
 plot(old_peeps)
 ```
-
 :::
