@@ -1,0 +1,987 @@
+---
+title: "Datacube processing II"
+subtitle: "Advanced Geospatial Data Processing for Social Scientists"
+author: "Dennis Abel & Stefan Jünger"
+date: April 29, 2025
+execute:
+  echo: true
+format:
+  revealjs:
+    embed-resources: true
+    theme: [simple, tweaks.css]
+    smaller: true
+    scrollable: true
+    slide-number: "c/t"
+    logo: ../img/GESIS-Logo_2024.svg.png
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r}
+#| include: false
+library(dplyr)
+library(stars)
+library(terra)
+library(tidyterra)
+library(sf)
+library(ggplot2)
+library(units)
+library(emo)
+```
+
+## Now
+
+```{r}
+#| echo: false
+source("course_content.R") 
+
+course_content |> 
+  kableExtra::row_spec(10, background = "yellow")
+```
+
+
+## Datacubes - continued
+
+Building on the introduction to data stacks and cubes in `R`, we now want to dig deeper into wrangling with these objects. We will cover more advanced raster operations and have a case study on accessing remote sensing data from an API. But first, we will briefly revise visualizing with `ggplot` - this time with our raster stacks/cubes.
+
+
+## Visualizing datacubes
+
+Yesterday, you learned about visualizing `SpatRaster` objects with `ggplot`. Extending this approach to raster stacks and cubes is quite straightforward. We can create multiple graphs within one plot ("facets") with `ggplot` which allows us to visualize two or more layers in one plot. 
+
+Many of you will know `facet_wrap()` or `facet_grid()` to separate standard graphs like scatterplots by a third grouping variable. The same logic applies to our third layer dimension (which in our case represents time but could potentially be any other band like RGB).
+
+
+## Visualizing `terra` raster stacks
+
+We will start with our `terra` `SpatRaster` and load the raster stack created in the previous session.
+
+```{r}
+#| eval: false
+CA_pop_stack <- terra::rast("./data/CA_pop_stack.tif")
+
+CA_pop_stack
+```
+
+```{r}
+#| echo: false
+CA_pop_stack <- terra::rast("../../data/CA_pop_stack.tif")
+
+CA_pop_stack
+```
+
+
+## Visualizing `terra` raster stacks
+
+You know the drill - `ggplot()` initializes our blank canvas which we fill with our geoms. `tidyterra's` `geom_spatraster()` is used for plotting `SpatRaster` objects. With your knowledge on indexing single layers within a raster stack, we can create a single plot like yesterday.
+
+:::: columns
+::: {.column width="50%"}
+```{r}
+#| eval: false
+#| fig.asp: 0.8
+library(tidyterra)
+library(scales)
+
+ggplot()+
+  geom_spatraster(data = CA_pop_stack[[1]])+
+  scale_fill_viridis_c(na.value = "transparent",
+                       name = "Pop count",
+                       limits = c(0, 2000),
+                       oob = scales::squish)+
+  theme_minimal()
+```
+:::
+
+::: {.column width="50%"}
+```{r}
+#| echo: false
+#| fig.asp: 0.8
+library(tidyterra)
+library(scales)
+
+ggplot()+
+  geom_spatraster(data = CA_pop_stack[[1]])+
+  scale_fill_viridis_c(na.value = "transparent",
+                       name = "Pop count",
+                       limits = c(0, 2000),
+                       oob = scales::squish)+
+  theme_minimal()
+```
+:::
+::::
+
+
+## Visualizing `terra` raster stacks
+
+Single layers can also be accessed with the layer name supplied to the `aes(fill=)` argument in `geom_spatraster()`.
+
+:::: columns
+::: {.column width="50%"}
+```{r}
+#| eval: false
+#| fig.asp: 0.8
+library(tidyterra)
+library(scales)
+
+ggplot()+
+  geom_spatraster(data = CA_pop_stack, aes(fill = pop_2017))+
+  scale_fill_viridis_c(na.value = "transparent",
+                       name = "Pop count",
+                       limits = c(0, 2000),
+                       oob = scales::squish)+
+  theme_minimal()
+```
+:::
+
+::: {.column width="50%"}
+```{r}
+#| echo: false
+#| fig.asp: 0.8
+library(tidyterra)
+library(scales)
+
+ggplot()+
+  geom_spatraster(data = CA_pop_stack, aes(fill = pop_2017))+
+  scale_fill_viridis_c(na.value = "transparent",
+                       name = "Pop count",
+                       limits = c(0, 2000),
+                       oob = scales::squish)+
+  theme_minimal()
+```
+:::
+::::
+
+## Visualizing `terra` raster stacks
+
+For visualizing all four layers simultaneously, we can utilize the `facet_wrap()` command. Instead of providing the name of a third variable to the command, we call `lyr`, which `geom_spatraster()` recognizes as the third dimension.
+
+:::: columns
+::: {.column width="50%"}
+```{r}
+#| eval: false
+#| fig.asp: 0.8
+ggplot()+
+  geom_spatraster(data = CA_pop_stack)+
+  scale_fill_viridis_c(na.value = "transparent",
+                       name = "Pop count",
+                       limits = c(0, 2000),
+                       oob = scales::squish)+
+  facet_wrap(~ lyr)+
+  theme_minimal()
+```
+:::
+
+::: {.column width="50%"}
+```{r}
+#| echo: false
+#| fig.asp: 0.8
+ggplot()+
+  geom_spatraster(data = CA_pop_stack)+
+  scale_fill_viridis_c(na.value = "transparent",
+                       name = "Pop count",
+                       limits = c(0, 2000),
+                       oob = scales::squish)+
+  facet_wrap(~ lyr)+
+  theme_minimal()
+```
+:::
+::::
+
+
+## Visualizing `terra` raster stacks
+
+Creating custom labels for your facets can generally be quite painful (not just for geodata). By default, it uses the values from the `names` of the `SpatRaster` attribute. If you want to change labels, you either change the `names` values (which we often don't want to) or create a workaround. For example, here we would like to use the `time` values. 
+
+:::: columns
+::: {.column width="50%"}
+```{r}
+#| eval: false
+#| fig.asp: 0.8
+facet_labels <- function(label) {
+  years <- as.character(terra::time(CA_pop_stack))
+  names(years) <- names(CA_pop_stack)
+  new_label <- unname(years[label])
+  new_label
+}
+
+ggplot()+
+  geom_spatraster(data = CA_pop_stack)+
+  scale_fill_viridis_c(na.value = "transparent",
+                       name = "Pop count",
+                       limits = c(0, 2000),
+                       oob = scales::squish)+
+  facet_wrap(~ lyr,
+             labeller = labeller(
+               lyr = facet_labels
+             )
+  )+
+  theme_minimal()
+```
+:::
+
+::: {.column width="50%"}
+```{r}
+#| echo: false
+#| fig.asp: 0.8
+facet_labels <- function(label) {
+  years <- as.character(terra::time(CA_pop_stack))
+  names(years) <- names(CA_pop_stack)
+  new_label <- unname(years[label])
+  new_label
+}
+
+ggplot()+
+  geom_spatraster(data = CA_pop_stack)+
+  scale_fill_viridis_c(na.value = "transparent",
+                       name = "Pop count",
+                       limits = c(0, 2000),
+                       oob = scales::squish)+
+  facet_wrap(~ lyr,
+             labeller = labeller(
+               lyr = facet_labels
+             )
+  )+
+  theme_minimal()
+```
+:::
+::::
+
+
+## Visualizing `terra` raster stacks
+
+Polishing your graph is business-as-usual. 
+
+:::: columns
+::: {.column width="50%"}
+```{r}
+#| eval: false
+#| fig.asp: 1
+library(ggspatial)
+
+facet_labels <- function(label) {
+  years <- as.character(terra::time(CA_pop_stack))
+  names(years) <- names(CA_pop_stack)
+  new_label <- unname(years[label])
+  new_label
+}
+
+ggplot()+
+  geom_spatraster(data = CA_pop_stack)+
+  scale_fill_viridis_c(na.value = "transparent",
+                       name = "Pop count",
+                       limits = c(0, 2000),
+                       oob = scales::squish)+
+  facet_wrap(~ lyr,
+             labeller = labeller(
+               lyr = facet_labels
+             )
+  )+
+  theme_minimal()+
+  labs(
+    title = "Population in California",
+    subtitle = "In absolute numbers on 1x1km grid",
+    caption = "Source: WorldPop (2018)"
+  ) +
+  annotation_scale(
+    location = "bl",
+    width_hint = 0.3
+  ) +
+  annotation_north_arrow(
+    location = "tr",
+    which_north = "true",
+    style = north_arrow_fancy_orienteering
+  )
+```
+:::
+
+::: {.column width="50%"}
+```{r}
+#| echo: false
+#| fig.asp: 1
+library(ggspatial)
+
+facet_labels <- function(label) {
+  years <- as.character(terra::time(CA_pop_stack))
+  names(years) <- names(CA_pop_stack)
+  new_label <- unname(years[label])
+  new_label
+}
+
+ggplot()+
+  geom_spatraster(data = CA_pop_stack)+
+  scale_fill_viridis_c(na.value = "transparent",
+                       name = "Pop count",
+                       limits = c(0, 2000),
+                       oob = scales::squish)+
+  facet_wrap(~ lyr,
+             labeller = labeller(
+               lyr = facet_labels
+             )
+  )+
+  theme_minimal()+
+  labs(
+    title = "Population in California",
+    subtitle = "In absolute numbers on 1x1km grid",
+    caption = "Source: WorldPop (2018)"
+  ) +
+  annotation_scale(
+    location = "bl",
+    width_hint = 0.3
+  ) +
+  annotation_north_arrow(
+    location = "tr",
+    which_north = "true",
+    style = north_arrow_fancy_orienteering
+  )
+```
+:::
+::::
+
+
+## Visualizing `stars` raster cubes
+
+Now we turn towards our `stars` datacubes and explore the visualization options. First, we load the raster cube created in the previous session.
+
+```{r}
+#| eval: false
+CA_pop_cube <- readRDS("./data/CA_pop_cube.rds")
+
+CA_pop_cube
+```
+
+```{r}
+#| echo: false
+CA_pop_cube <- readRDS("../../data/CA_pop_cube.rds")
+
+CA_pop_cube
+```
+
+
+## Visualizing `stars` raster cubes
+
+Base `R` plotting of `stars` objects is possible. However, the default color-scheme is limited and often results in plots like this one which are relatively uninformative. It would require manual workarounds on breaks to adjust this. We prefer to directly move on to `ggplot`.
+
+:::: columns
+::: {.column width="50%"}
+```{r}
+#| eval: false
+#| fig.asp: 0.8
+plot(CA_pop_cube[,,,1])
+```
+:::
+
+::: {.column width="50%"}
+```{r}
+#| echo: false
+#| fig.asp: 0.8
+plot(CA_pop_cube[,,,1])
+```
+:::
+::::
+
+
+## Visualizing `stars` raster cubes
+
+Setting up your visualization with `ggplot` is very similar to the approach before for `SpatRaster` data. `geom_stars` allows us to directly input a stars object.
+
+:::: columns
+::: {.column width="50%"}
+```{r}
+#| eval: false
+#| fig.asp: 1
+ggplot() +
+  geom_stars(data = CA_pop_cube[,,,1], 
+             aes(fill = population)
+             ) +
+  scale_fill_viridis_c(na.value = "transparent",
+                       name = "Pop count",
+                       limits = c(0, 2000),
+                       oob = scales::squish)+
+  coord_equal() +
+  theme_minimal()
+```
+:::
+
+::: {.column width="50%"}
+```{r}
+#| echo: false
+#| fig.asp: 1
+ggplot() +
+  geom_stars(data = CA_pop_cube[,,,1], aes(fill = population)) +
+  scale_fill_viridis_c(na.value = "transparent",
+                       name = "Pop count",
+                       limits = c(0, 2000),
+                       oob = scales::squish)+
+  coord_equal() +
+  theme_minimal()
+```
+:::
+::::
+
+
+## Visualizing `stars` raster cubes
+
+With `facet_wrap`, we can create a combination of several layers into one plot. Given that `stars` objects can have *>1* bands, we specify it with the exact name. Here it is "time". Facet labels are directly derived from that band. We do not need to wrangle with labeling further.
+
+:::: columns
+::: {.column width="50%"}
+```{r}
+#| eval: false
+#| fig.asp: 1
+ggplot() +
+  geom_stars(data = CA_pop_cube, aes(fill = population)) +
+  scale_fill_viridis_c(na.value = "transparent",
+                       name = "Pop count",
+                       limits = c(0, 2000),
+                       oob = scales::squish)+
+  coord_equal() +
+  facet_wrap(~ time)+
+  theme_minimal()+
+  labs(
+    title = "Population in California",
+    subtitle = "In absolute numbers on 1x1km grid",
+    caption = "Source: WorldPop (2018)"
+  ) +
+  annotation_scale(
+    location = "bl",
+    width_hint = 0.3
+  ) +
+  annotation_north_arrow(
+    location = "tr",
+    which_north = "true",
+    style = north_arrow_fancy_orienteering
+  )
+```
+:::
+
+::: {.column width="50%"}
+```{r}
+#| echo: false
+#| fig.asp: 1
+ggplot() +
+  geom_stars(data = CA_pop_cube, aes(fill = population)) +
+  scale_fill_viridis_c(na.value = "transparent",
+                       name = "Pop count",
+                       limits = c(0, 2000),
+                       oob = scales::squish)+
+  coord_equal() +
+  facet_wrap(~ time)+
+  theme_minimal()+
+  labs(
+    title = "Population in California",
+    subtitle = "In absolute numbers on 1x1km grid",
+    caption = "Source: WorldPop (2018)"
+  ) +
+  annotation_scale(
+    location = "bl",
+    width_hint = 0.3
+  ) +
+  annotation_north_arrow(
+    location = "tr",
+    which_north = "true",
+    style = north_arrow_fancy_orienteering
+  )
+```
+:::
+::::
+
+## Exercise 6_1: A map with many facets
+
+![](../img/cat_quality.png){fig-align="center" width="50%"}
+
+*AI-assisted picture*
+
+## Case study - Nighttime lights
+
+Now that we have established an understanding of raster stacks and cubes in `R`, we would like to introduce a case study in nighttime lights. We will briefly introduce:
+
+- Remote sensing and how nighttime lights data is generated, 
+- how we can access that data via a public API and, 
+- how to wrangle with that data. 
+
+In particular, we will focus on working with and "harmonizing" raster layers with different spatial properties.
+
+
+## R package `blackmarbler`
+
+:::: columns
+::: {.column width="70%"}
+`blackmarbleR` by Robert Marty and Gabriel Stefanini Vicente (2025) supports easy access to NASA's Black Marble API. Let's check out their [vignette](https://worldbank.github.io/blackmarbler/) to set up an account and the data retrieval.
+
+```{r}
+library(blackmarbler)
+```
+:::
+
+::: {.column width="30%"}
+![](../img/blackmarbler.png){fig-align="center" width="100%"}
+:::
+::::
+
+## Data retrieval
+
+The function `bm_raster()` to retrieve the nighttime lights requires as input an `sf`object to determine the spatial extent of the downloaded data. The object must be in **WGS84**. 
+
+We will focus on California. Let's load US states shapefiles with the `tigris` package and subset to California.
+
+:::: columns
+::: {.column width="50%"}
+```{r}
+#| eval: false
+#| fig.asp: 1
+CA_sf <- tigris::states(progress_bar=FALSE) |> 
+  dplyr::filter(STUSPS == "CA") |> 
+  sf::st_transform(crs = "EPSG:4326")
+
+print(CA_sf)
+
+plot(sf::st_geometry(CA_sf))
+```
+:::
+
+::: {.column width="50%"}
+```{r}
+#| echo: false
+#| fig.asp: 1
+CA_sf <- tigris::states(progress_bar=FALSE) |> 
+  dplyr::filter(STUSPS == "CA") |> 
+  sf::st_transform(crs = "EPSG:4326")
+
+print(CA_sf)
+
+plot(sf::st_geometry(CA_sf))
+```
+:::
+::::
+
+
+## Data retrieval
+
+Once you have set up your profile at [NASA's Earth Data Portal](https://urs.earthdata.nasa.gov/) and generated your API token, you can assign it to an object in `R` for the data retrieval. 
+
+*NOTE*: I stored mine as an environment variable in the system so that I don't hard code it into these slides. If you work locally on your own laptop, this is not necessary. 
+
+```{r}
+bearer <- Sys.getenv("NASA-token")
+
+# If you work locally, directly assign it
+# bearer <- "YOUR_TOKEN"
+```
+
+
+## Data retrieval
+
+We are ready to download the data from NASA's API.
+
+```{r}
+#| eval: false
+CA_nl_stack <- bm_raster(roi_sf = CA_sf,
+                         product_id = "VNP46A4", # for yearly data
+                         date = 2017:2020, # same four years like our population data
+                         bearer = bearer, # your API token
+                         output_location_type = "file", # we want to store geotiff on disk
+                         file_dir = "./data/", # where to store geotiff
+                         file_return_null = FALSE # also create SpatRaster file
+)
+
+
+```
+
+
+## Data retrieval
+
+By default, the function writes the data to the `R` environment (`output_location_type = "memory"`). If you want to store it as single GeoTIFFs, specify `output_location_type = "file` and the file path with `file_dir=`. `file_return_null=` further specifies whether the data is additionally loaded to the `R` environment.
+
+In the previous step, we wrote the data to the disk. Let's load a single layer for 2020 to inspect the data a bit further.
+
+```{r}
+#| eval: false
+CA_nl_2020 <- terra::rast("./data/VNP46A4_NearNadir_Composite_Snow_Free_qflag_t2020.tif")
+
+print(CA_nl_2020)
+
+```
+
+```{r}
+#| echo: false
+CA_nl_2020 <- terra::rast("../../data/VNP46A4_NearNadir_Composite_Snow_Free_qflag_t2020.tif")
+
+print(CA_nl_2020)
+
+```
+
+
+## Data retrieval
+
+The data is right-skewed. We perform a log-transformation to account for that.
+
+Let's inspect the data visually.
+
+:::: columns
+::: {.column width="50%"}
+```{r}
+#| eval: false
+#| fig.asp: 1
+CA_nl_2020[] <- log(CA_nl_2020[] + 1)
+
+ggplot() +
+  geom_spatraster(data = CA_nl_2020) +
+  geom_sf(data = CA_sf,
+          fill = "transparent",
+          color = "white",
+          size = 4) +
+  scale_fill_gradient2(low = "black",
+                       mid = "yellow",
+                       high = "red",
+                       midpoint = 3,
+                       na.value = "transparent") +
+  labs(title = "Nighttime Lights in California 2020") +
+  coord_sf() +
+  theme_void() +
+  theme(plot.title = element_text(face = "bold", hjust = 0.5),
+        legend.position = "none")
+
+```
+:::
+
+::: {.column width="50%"}
+```{r}
+#| echo: false
+#| fig.asp: 1
+CA_nl_2020[] <- log(CA_nl_2020[] + 1)
+
+ggplot() +
+  geom_spatraster(data = CA_nl_2020) +
+  geom_sf(data = CA_sf,
+          fill = "transparent",
+          color = "white",
+          size = 4) +
+  scale_fill_gradient2(low = "black",
+                       mid = "yellow",
+                       high = "red",
+                       midpoint = 3,
+                       na.value = "transparent") +
+  labs(title = "Nighttime Lights in California 2020") +
+  coord_sf() +
+  theme_void() +
+  theme(plot.title = element_text(face = "bold", hjust = 0.5),
+        legend.position = "none")
+```
+:::
+::::
+
+
+## Layers with different properties
+
+We want to utilize this NL data to explore a bit further how to create and process raster stacks. This time, we will focus on situations with more than one variable and on cases where the spatial properties of the different layers do not match. We will work with night lights and population data in 2020.
+
+We will zoom to Los Angeles County for this exercise.
+
+:::: columns
+::: {.column width="50%"}
+```{r}
+# Load LA County file
+LA_county <- tigris::counties("CA", 
+                              progress_bar = FALSE
+                              ) |> 
+  filter(NAME == "Los Angeles") |> 
+  st_transform(crs = "EPSG:4326")
+
+# Subset to "mainland" California and 
+# exclude the two islands Santa Catalina and San Clemente
+LA_county <- LA_county %>%
+  st_cast("POLYGON") %>% 
+  mutate(area = st_area(.)) %>%
+  slice_max(area, n = 1)
+```
+:::
+
+::: {.column width="50%"}
+```{r}
+#| echo: false
+print(LA_county)
+plot(st_geometry(LA_county))
+```
+:::
+::::
+
+## Layers with different properties
+
+Having our spatial `sf` file properly set up, we can now prep our two raster files.
+
+```{r}
+#| eval: false
+# Create LA raster files for population and night lights in 2020
+LA_pop_2020 <- terra::rast("./data/US-CA_ppp_2020_1km.tif") |> 
+  terra::mask(terra::vect(LA_county)) |> 
+  terra::crop(LA_county)
+
+LA_pop_2020[] <- log(LA_pop_2020[] + 1)
+
+LA_nl_2020 <- terra::mask(CA_nl_2020,
+                          terra::vect(LA_county)) |>
+  terra::crop(LA_county)
+```
+
+```{r}
+#| echo: false
+# Create LA raster files for population and night lights in 2020
+LA_pop_2020 <- terra::rast("../../data/US-CA_ppp_2020_1km.tif") |> 
+  terra::mask(terra::vect(LA_county)) |> 
+  terra::crop(LA_county)
+
+LA_pop_2020[] <- log(LA_pop_2020[] + 1)
+
+LA_nl_2020 <- terra::mask(CA_nl_2020,
+                          terra::vect(LA_county)) |>
+  terra::crop(LA_county)
+```
+
+## Layers with different properties
+
+Visually, there is a strong positive relationship between nighttime lights and population in LA. 
+
+:::: columns
+::: {.column width="50%"}
+```{r}
+plot(LA_pop_2020)
+```
+:::
+
+::: {.column width="50%"}
+```{r}
+plot(LA_nl_2020)
+```
+:::
+::::
+
+
+## Layers with different properties
+
+Our two raster files have the same CRS and (almost same) spatial extent. Unfortunately,
+the resolution (cell size) differs. Our population data is on an approx. 1km grid and our night lights data on an approx. 500m grid.
+
+:::: columns
+::: {.column width="50%"}
+```{r}
+print(LA_pop_2020)
+```
+:::
+
+::: {.column width="50%"}
+```{r}
+print(LA_nl_2020)
+```
+:::
+::::
+
+
+## Layers with different properties
+
+Most simple solution to harmonize: If cell sizes are multiples (which is the case in our example), we can use `terra::disagg()` or `terra::aggregate()` to adjust resolution of one layer to resolution of another.
+
+First option: Increase resolution for population data
+
+```{r}
+# Increase resolution for population data
+LA_pop_2020_high <- terra::disagg(LA_pop_2020,
+                                 fact = c(2, 2),
+                                 method = "bilinear")
+
+# There is still a slight mismatch due to rounding errors (one more ncol)
+# Let's crop to the spatial extent of the nightlights data
+LA_pop_2020_high <- crop(
+  LA_pop_2020_high, 
+  terra::ext(LA_nl_2020)
+)
+
+```
+
+
+## Layers with different properties
+
+Most simple solution to harmonize: If cell sizes are multiples (which is the case in our example), we can use `terra::disagg()` or `terra::aggregate()` to adjust resolution of one layer to resolution of another.
+
+First option: Increase resolution for population data
+
+```{r}
+# Cross-check
+res(LA_pop_2020_high)
+res(LA_nl_2020)
+ext(LA_pop_2020_high)
+ext(LA_nl_2020)
+
+# A small rounding error in extent will prohibit to concatenate 
+# into a stack. We now force the extent
+ext(LA_pop_2020_high) <- ext(LA_nl_2020)
+```
+
+
+## Layers with different properties
+
+Most simple solution to harmonize: If cell sizes are multiples (which is the case in our example), we can use `terra::disagg()` or `terra::aggregate()` to adjust resolution of one layer to resolution of another.
+
+Second option: Decrease resolution for nightlights data
+
+```{r}
+# Decrease resolution for nightlights data
+LA_nl_2020_low <- terra::aggregate(LA_nl_2020,
+                                     fact = c(2, 2),
+                                     method = "bilinear")
+
+# There is still a slight mismatch due to rounding errors (one more ncol)
+# Let's crop to the spatial extent of the population data
+LA_nl_2020_low <- crop(
+  LA_nl_2020_low, 
+  terra::ext(LA_pop_2020)
+)
+
+```
+
+
+## Layers with different properties
+
+Most simple solution to harmonize: If cell sizes are multiples (which is the case in our example), we can use `terra::disagg()` or `terra::aggregate()` to adjust resolution of one layer to resolution of another.
+
+Second option: Decrease resolution for nightlights data
+
+```{r}
+# Cross-check
+res(LA_pop_2020)
+res(LA_nl_2020_low)
+ext(LA_pop_2020)
+ext(LA_nl_2020_low)
+
+ext(LA_nl_2020_low) <- ext(LA_pop_2020)
+```
+
+
+## Layers with different properties
+
+If cell sizes are not a multiple, we can utilize `terra::resample()` to adjust resolution of one layer based on resolution of another.
+
+```{r}
+# Cross-check
+LA_pop_2020_resampled <- resample(
+  x      = LA_pop_2020,
+  y      = LA_nl_2020,
+  method = "bilinear"
+)
+
+res(LA_pop_2020_resampled)
+res(LA_nl_2020)
+ext(LA_pop_2020_resampled)
+ext(LA_nl_2020)
+```
+
+
+## Layers with different properties
+
+In our case, resampling directly created a perfect fit in resolution. We can combine both layers into a stack.
+
+```{r}
+LA_stack <- c(LA_pop_2020_resampled, LA_nl_2020)
+
+print(LA_stack)
+```
+
+
+## Layers with different properties
+
+```{r}
+varnames(LA_stack) <- c("population", "nightlights")
+names(LA_stack) <- c("population", "nightlights")
+
+terra::plot(LA_stack)
+```
+
+
+## Layers with different properties
+
+More complex: Imputation logics. Previous examples follow the idea of interpolating existing data across the spatial domain. Imputation fills in missing values based on a prediction model. Let's consider our two variables to make up a stylized example:
+
+We know that population density and nightlights is correlated. We could try to predict the missing values for population based on the values of nightlights to generate the higher resolution population data. In order to do that, we train a RandomForest model on the low resolution data of population and nightlights.
+
+```{r}
+library(randomForest)
+```
+
+
+## Layers with different properties
+
+There is some data prepping to do...
+
+```{r}
+# Covariates need to be in same size as outcome variable = 1km
+LA_nl_2020_resampled <- resample(
+  x      = LA_nl_2020,
+  y      = LA_pop_2020,
+  method = "bilinear"
+)
+
+# Create training data - one row per cell
+train_data <- as.data.frame(LA_nl_2020_resampled, 
+                            xy = TRUE, 
+                            cells = TRUE,
+                            na.rm = FALSE) |> 
+  left_join(as.data.frame(LA_pop_2020, 
+                          xy=FALSE, 
+                          cells=TRUE, 
+                          na.rm=FALSE),
+            by = "cell") |> 
+  rename(nightlights = t2020,
+         population = `US-CA_ppp_2020_1km`)
+
+train_data <- na.omit(train_data)
+```
+
+
+## Layers with different properties
+
+Ready to fit the model and predict population data on 500m grid.
+
+```{r}
+# Fit model
+out <- randomForest(
+  population ~ nightlights,
+  data = train_data,
+  ntree = 500
+)
+
+# Predict on the 500m grid
+# Covariate names need to match
+names(LA_stack)
+
+pop_500m <- predict(LA_stack, out)
+
+names(pop_500m) <- "population_predicted"
+
+LA_stack <- c(LA_stack, pop_500m)
+```
+
+
+## Layers with different properties
+
+Of course this is a simplified approach. What other factors might correlate with population data (and nightlights) and might improve the validity of the imputed cells?
+
+```{r}
+terra::plot(LA_stack)
+```
+
+
+## Stack-based descriptive statistics
+
+```{r}
+# Global univariate means
+global(LA_stack, fun = mean, na.rm=TRUE)
+
+# Bivariate correlations
+layerCor(LA_stack, fun = "cor", use = "complete.obs")
+```
+
+## Exercise 6_2: Combining different layers
+
+![](../img/cat_scientist.png){fig-align="center" width="50%"}
+
+*AI-assisted picture*

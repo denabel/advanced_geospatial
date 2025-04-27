@@ -691,10 +691,30 @@ print(CA_pop_cube)
 
 ## `stars` approach: stacking raster layers
 
-We index time layers by index number.
+Indexing `stars` objects differs a bit compared to `SpatRaster`. Given that `stars`objects can store more than one attribute (variable), we need to consider four levels:
 
 ```{r}
-CA_pop_cube[,,,1]
+# Return stars object and drop all attributes except "population"
+class(CA_pop_cube["population"])
+
+# Drop stars metadata and just pull out array of attribute "population
+str(CA_pop_cube[["population"]])
+
+# Same
+str(CA_pop_cube$population)
+
+# Spatial slicing on four levels
+CA_pop_cube[1, # which attribute
+            , # x
+            , # y
+            ] # which time
+# Here we select attribute 1 across all dimensions
+
+# All data for first time-slice
+CA_pop_cube[ , , , 1]
+
+# Specifying x and y window
+CA_pop_cube[ ,1:100 ,1:100 , ]
 ```
 
 
@@ -718,6 +738,29 @@ write_stars(CA_pop_cube,
             driver = "GTiff",
             options = c("COMPRESS=LZW", "BIGTIFF=YES")
             )
+```
+
+
+## `stars` approach: stacking raster layers
+
+The **GeoTIFF** format will store the most important data on cell values, x, y, and "bands" and the associated CRS. However, it will discard our coding of the time metadata. If we want to export the `stars` object for `R` usage only, we can simply store it as `.rds`-file to preserve the entire dataset. Exporting for external usage which preserves the extra dimensions can be done in **NetCDF** format.
+
+```{r}
+#| eval: false
+saveRDS(CA_pop_cube, "./data/CA_pop_cube.rds")
+
+write_stars(CA_pop_cube, 
+            "./data/CA_pop_cube.nc",
+            driver = "netCDF")
+```
+
+```{r}
+#| echo: false
+saveRDS(CA_pop_cube, "../../data/CA_pop_cube.rds")
+
+write_stars(CA_pop_cube, 
+            "../../data/CA_pop_cube.nc",
+            driver = "netCDF")
 ```
 
 

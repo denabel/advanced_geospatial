@@ -23,13 +23,11 @@ We want to create a second graph which zooms into Texas and visualizes populatio
 We need the two raster layers for Texas in 2000 and 2020 (`./data/usa_ppp_2000_1km_Aggregated.tif` and `./data/usa_ppp_2020_1km_Aggregated.tif`). We also need county shapefiles for Texas, which can be downloaded with the `tigris` package (`tigris::counties("TX")`). After loading the three objects, create a simple plot of the counties shapefile.
 :::
 
-
 ::: callout-note
 ## `r emo::ji("weight_lifting_man")` Exercise 2
 
 In order to study population dynamics in Texas, we will calculate simple differences between 2000 and 2020 for each grid cell based on our two raster layers for Texas. Store the result in a new raster file and visualize a simple plot of it. Texas is one of the US states with the highest population increase in the last decades - this should be reflected in the map.
 :::
-
 
 ::: callout-note
 ## `r emo::ji("weight_lifting_man")` Exercise 3
@@ -40,13 +38,11 @@ Like before, we want our raster and vector data to have matching CRS. "NAD83 / T
 -   Reproject the raster file which stores the population changes and your counties shapefile accordingly.
 :::
 
-
 ::: callout-note
 ## `r emo::ji("weight_lifting_man")` Exercise 4
 
-Let's create a first plot with `ggplot`which contains the shapefile and raster file. Adjust the color scheme by utilizing `scale_fill_viridis_c`, `scale_fill_distiller`, or `scale_fill_gradient2`. 
+Let's create a first plot with `ggplot`which contains the shapefile and raster file. Adjust the color scheme by utilizing `scale_fill_viridis_c`, `scale_fill_distiller`, or `scale_fill_gradient2`.
 :::
-
 
 ::: callout-note
 ## `r emo::ji("weight_lifting_man")` Exercise 5
@@ -54,15 +50,10 @@ Let's create a first plot with `ggplot`which contains the shapefile and raster f
 We also want to attach labels to the top three counties by population growth. You can utilize `slice_head(n = 3)` after ordering the data in descending order to select only those three observations. Add this as an additional layer to the plot as text or text labels.
 :::
 
-
 ::: callout-note
 ## `r emo::ji("weight_lifting_man")` Exercise 6
 
-Polish your visualization. You could:
-- Turn NAs transparent,
-- Add titles,
-- Adjust the overall theme of the plot,
-- Add North arrow and scale bar.
+Polish your visualization. You could: - Turn NAs transparent, - Add titles, - Adjust the overall theme of the plot, - Add North arrow and scale bar.
 :::
 
 ### Solutions
@@ -111,7 +102,6 @@ plot(st_geometry(TX_counties))
 ```
 :::
 
-
 ::: {.callout-tip collapse="true"}
 ## `r emo::ji("white_check_mark")` Solution 2
 
@@ -125,7 +115,6 @@ terra::plot(TX_pop_diff)
 ```
 :::
 
-
 ::: {.callout-tip collapse="true"}
 ## `r emo::ji("white_check_mark")` Solution 3
 
@@ -134,7 +123,6 @@ TX_pop_diff <- terra::project(TX_pop_diff, "EPSG:3081")
 TX_counties <- sf::st_transform(TX_counties, crs = "EPSG:3081")
 ```
 :::
-
 
 ::: {.callout-tip collapse="true"}
 ## `r emo::ji("white_check_mark")` Solution 4
@@ -176,7 +164,6 @@ ggplot()+
 ```
 :::
 
-
 ::: {.callout-tip collapse="true"}
 ## `r emo::ji("white_check_mark")` Solution 5
 
@@ -208,7 +195,6 @@ ggplot()+
   )
 ```
 :::
-
 
 ::: {.callout-tip collapse="true"}
 ## `r emo::ji("white_check_mark")` Solution 6
