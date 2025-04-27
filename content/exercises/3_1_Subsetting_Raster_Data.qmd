@@ -49,20 +49,20 @@ Northern Germany (examples):
 -   Brandenburg
 -   Berlin
 
-Southern Germany (examples): 
+Southern Germany (examples):
 
-- Bavaria (Bayern) 
-- Baden-Württemberg 
-- Saarland 
-- Rhineland-Palatinate (Rheinland-Pfalz)
+-   Bavaria (Bayern)
+-   Baden-Württemberg
+-   Saarland
+-   Rhineland-Palatinate (Rheinland-Pfalz)
 
-Gray zone (in between North and South): 
+Gray zone (in between North and South):
 
-- North Rhine-Westphalia (Nordrhein-Westfalen) 
-- Hesse (Hessen) 
-- Saxony (Sachsen) 
-- Saxony-Anhalt (Sachsen-Anhalt) 
-- Thuringia (Thüringen)
+-   North Rhine-Westphalia (Nordrhein-Westfalen)
+-   Hesse (Hessen)
+-   Saxony (Sachsen)
+-   Saxony-Anhalt (Sachsen-Anhalt)
+-   Thuringia (Thüringen)
 
 Feel free to decide for yourself how you classify the "gray zone" states! Your definition is part of the creative freedom in this exercise.
 :::
