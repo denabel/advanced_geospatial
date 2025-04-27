@@ -201,23 +201,16 @@ Better tools
 
 In the folder called `./data`, you can find (most of) the data files prepped for all the exercises and slides. The following data are included:
 
--   Administrative borders of Germany (Prefix *VG250\_*) are provided by the German [Federal Agency for Cartography and Geodesy](http://www.bkg.bund.de) (2018). Check out their [Open Data Portal](https://gdz.bkg.bund.de/index.php/default/open-data.html).
+- Administrative borders of Germany (Prefix *VG250\_*) are provided by the German [Federal Agency for Cartography and Geodesy](http://www.bkg.bund.de) (2018). Check out their [Open Data Portal](https://gdz.bkg.bund.de/index.php/default/open-data.html).
 
--   The locations of e-car charging stations in Germany are retrieved from the [Bundesnetzagentur](https://www.bundesnetzagentur.de/DE/Fachthemen/ElektrizitaetundGas/E-Mobilitaet/Ladesaeulenkarte/start.html).
+- German Census 2022 data are provided by the [Federal Statistical Office Germany, Wiesbaden 2024](https://www.zensus2022.de). We used our colleague [Jonas Lieth](https://www.gesis.org/institut/ueber-uns/mitarbeitendenverzeichnis/person/Jonas.Lieth)'s (experimental) `R`package [`z22`](https://github.com/JsLth/z22) to gather the data for you. If you're stuck using the data, `z22::z22_categories()` may help you (e.g., `z22::z22_categories("foreigners)`).
 
--   Election Results for the German Right-Wing Populist Party *AfD* in the 2021 German federal election ([Der Bundeswahlleiter, Wiesbaden 2018](https://www.bundeswahlleiter.de/bundestagswahlen/2017/ergebnisse/weitere-ergebnisse.html)).
 
 ## Geospatial data in this course II
 
--   District attributes are from [INKAR](https://www.inkar.de/) and curated by Bundesinstitut für Bau-, Stadt- und Raumforschung (BBSR)
+- WorldPop data are provided by a [research group based at the University of Southampton](https://www.worldpop.org/), offering high-resolution, open-access data on population distribution and demographics. The datasets combine census information, satellite imagery, and statistical modeling to support research, policy-making, and humanitarian efforts worldwide.
 
--   German Census 2011 data are provided by the [Federal Statistical Office Germany, Wiesbaden 2020](https://www.zensus2011.de/EN/Home/home_node.html)
-
--   Shapefiles, voting data, and car-related data for Cologne are gathered from the [Open Data Portal Cologne](https://www.offenedaten-koeln.de/)
-
--   Information about public transport stops and streets are from [OpenStreetMap](https://www.openstreetmap.org/)
-
--   Weather data are gathered from [Climate Data Center of the German Weather Service](https://www.dwd.de/DE/klimaumwelt/cdc/cdc_node.html)
+- ERA5 is provided by the [Copernicus Climate Change Service](https://climate.copernicus.eu/) (C3S) and offers high-resolution, global reanalysis data on atmospheric, land, and oceanic variables. The datasets combine observations with models to produce consistent climate information used for research, forecasting, and environmental monitoring.
 
 **Please make sure that if you reuse any of the provided data to cite the original data sources.**
 
