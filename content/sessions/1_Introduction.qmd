@@ -205,12 +205,16 @@ In the folder called `./data`, you can find (most of) the data files prepped for
 
 - German Census 2022 data are provided by the [Federal Statistical Office Germany, Wiesbaden 2024](https://www.zensus2022.de). We used our colleague [Jonas Lieth](https://www.gesis.org/institut/ueber-uns/mitarbeitendenverzeichnis/person/Jonas.Lieth)'s (experimental) `R`package [`z22`](https://github.com/JsLth/z22) to gather the data for you. If you're stuck using the data, `z22::z22_categories()` may help you (e.g., `z22::z22_categories("foreigners)`).
 
+- WorldPop data are provided by a [research group based at the University of Southampton](https://www.worldpop.org/), offering high-resolution, open-access data on population distribution and demographics. The datasets combine census information, satellite imagery, and statistical modeling to support research, policy-making, and humanitarian efforts worldwide.
+
 
 ## Geospatial data in this course II
 
-- WorldPop data are provided by a [research group based at the University of Southampton](https://www.worldpop.org/), offering high-resolution, open-access data on population distribution and demographics. The datasets combine census information, satellite imagery, and statistical modeling to support research, policy-making, and humanitarian efforts worldwide.
-
 - ERA5 is provided by the [Copernicus Climate Change Service](https://climate.copernicus.eu/) (C3S) and offers high-resolution, global reanalysis data on atmospheric, land, and oceanic variables. The datasets combine observations with models to produce consistent climate information used for research, forecasting, and environmental monitoring.
+
+- The International Social Survey Programme (ISSP) [available at GESIS](https://search.gesis.org/research_data/ZA7650) is provided by a cross-national collaboration of research organizations, delivering annual survey data on social attitudes and behaviors. The datasets cover a wide range of topics like work, family, environment, and social inequality, supporting comparative social science research worldwide.
+
+- The synthetic survey geocoordinates dataset is a simulated dataset comprising 2,000 spatial coordinates and one synthetic attribute related to migration status. It is designed for training and testing spatial analysis workflows without the constraints of real-world data privacy issues and was created using Stefan's experimental [`geosynth` `R` package](https://github.com/StefanJuenger/geosynth).
 
 **Please make sure that if you reuse any of the provided data to cite the original data sources.**
 
