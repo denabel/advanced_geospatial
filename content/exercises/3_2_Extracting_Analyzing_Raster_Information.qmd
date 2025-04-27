@@ -78,6 +78,7 @@ Finally, link the aggregated raster data with your synthetic geocoordinates agai
 ### Solutions
 
 ::: {.callout-tip collapse="true"}
+## `r emo::ji("white_check_mark")` Solution 1
 ```{r}
 #| eval: false
 library(terra)
