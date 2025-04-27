@@ -52,11 +52,11 @@ In this session, you will learn
 
 ## Cropping raster data
 
-Cropping is a method of cutting out a specific 'slice' of a raster layer based on an input dataset or geospatial extent, such as a bounding box. We often do this to 'zoom' in on a dataset or to make our computations more efficient. Let's pretend, we are mainly interested in the small-scale population size of Eastern Germany. For this purpose, we can use the bounding box of Eastern Germany.
+Cropping is a method of cutting out a specific 'slice' of a raster layer based on an input dataset or geospatial extent, such as a bounding box. We often do this to 'zoom' in on a dataset or to make our computations more efficient. Let's pretend we are mainly interested in the small-scale population size of Eastern Germany. For this purpose, we can use the bounding box of Eastern Germany.
 
 ## Bounding box in `R`
 
-The easiest way (in my opinion) to create a bounding box in `R` is to use the `sf::st_bbox()` function, possibly based on another geospatial dataset (and not ChatGPT).
+The easiest way (in my opinion) to create a bounding box in `R` is to use the `sf::st_bbox()` function, possibly based on another geospatial dataset.
 
 ```{r}
 #| eval: false
@@ -128,7 +128,7 @@ terra::plot(pop_grid_2022_crop)
 
 ## Wait a minute...
 
-...does these data solely comprise Eastern German states? Let's have a look at their shapes.
+...does these data only include Eastern German states? Let's have a look at their shapes.
 
 :::: columns
 ::: {.column width="50%"}
@@ -265,7 +265,7 @@ Raster data are helpful when we aim to
 
 ## Pulling in some data
 
-For this effort, we re-import the synthetic survey geocoordinates. We sample 100 geocoordinates from the whole dataset, as we only need a few for demonstrating the procedures that are following.
+For this effort, we re-import the synthetic survey geocoordinates. We sample 100 geocoordinates from the whole dataset, as we only need a few to demonstrate the procedures that are followed.
 
 :::: columns
 ::: {.column width="50%"}
@@ -300,7 +300,7 @@ points
 
 ## Raster extraction
 
-To extract the raster values at a specific point by location, we use the following:
+We use the following to extract the raster values at a specific point by location.
 
 ```{r}
 terra::extract(pop_grid_2022, points, ID = FALSE) |> 
@@ -309,7 +309,7 @@ terra::extract(pop_grid_2022, points, ID = FALSE) |>
 
 ## Add results to existing dataset
 
-This information can be added to an existing dataset (our points in this example):
+This information can be added to an existing dataset (our points in this example).
 
 ```{r}
 points$pop <- 
@@ -329,7 +329,7 @@ Sometimes, extracting information 1:1 is not enough.
 
 ## Buffer extraction
 
-We can use spatial buffers of different sizes to extract information on surroundings:
+We can use spatial buffers of different sizes to extract information about our surroundings.
 
 :::: columns
 ::: {.column width="50%"}
@@ -365,7 +365,7 @@ terra::extract(
 
 ## Extraction toggles: `touches`
 
-There's a multitude of arguments that we can adjust to conduct the extraction. An important option is on from which raster cells we want our extraction to be done. Here's an example how the argument `terra::extract(..., touches = FALSE/TRUE)` works.
+There's a multitude of arguments that we can adjust to conduct the extraction. An important option is from which raster cells we want our extraction done. Here's an example of how the argument `terra::extract(..., touches = FALSE/TRUE)` works.
 
 ![](../img/extract_touches.png){.r-stretch fig-align="center"}
 
@@ -409,7 +409,7 @@ terra::extract(
 
 ## Extraction function
 
-Often we default on the mean of raster cell values to be extracted. As we deal with population counts in our example, maybe calculating the sum is more relevant. Or the maximum?
+Often, we default to the mean of raster cell values to be extracted. In our example, calculating the sum is more relevant as we deal with population counts. Or the maximum?
 
 :::: columns
 ::: {.column width="50%"}
@@ -464,7 +464,7 @@ terra::extract(
 
 ## Raster aggregation
 
-We can use the same procedure to aggregate a raster dataset into a vector polygon dataset. That's a widespread use case. Let's load our German districts vector dataset in `./data/`. And this time, we use raster data on gender ratios from 2020.
+We can use the same procedure to aggregate a raster dataset into a vector polygon dataset. That's a widespread use case. Let's load our German districts vector dataset in `./data/`. This time, we will use WorldPop raster data on gender ratios from 2020.
 
 :::: columns
 ::: {.column width="50%"}
@@ -520,7 +520,7 @@ plot(
 
 ## Adding the aggregated data
 
-Again, we simply use `terra::extract()` to create the aggregated data, which we then can add to our vector dataset.
+Again, we use `terra::extract()` to create the aggregated data, which we can add to our vector dataset.
 
 :::: columns
 ::: {.column width="50%"}
@@ -564,11 +564,11 @@ plot(german_districts["gender_ratios_2020"])
 
 ## Digging deeper
 
-The previous steps are more or less efforts than work on the raw raster cell values data. However, there are occasions where we might want to work on the raster data themselves or at least pre-process them to add them to another dataset (e.g., a vector file). Some of these procedures are for visualization, such as heatmaps, others are necessary for our later analyses. We will show a few in the following.
+The previous steps are efforts that work on the raw raster cell values data. However, there are occasions where we might want to work on the raster data themselves or pre-process them to add them to another dataset (e.g., a vector file). Some of these procedures are for visualization, such as heat maps, and others are necessary for our later analyses. We will show a few in the following.
 
-## Creating a quick 'heatmap'
+## Creating a quick 'heat map'
 
-Population counts for the whole of Germany helps us to identify urban and rural clusters. But there may be applications where we need to zoom in on a specific city to identify within-city variations, also regarding foreinger shares. Let's do that for the German capital Berlin. For this purpose, we subset the district data and also mask and crop data on foreigner shares from the German census.
+Population counts for the whole of Germany help us to identify urban and rural clusters. But there may be applications where we need to zoom in on a specific city to identify within-city variations regarding specific attributes like foreigner shares. Let's do that for the German capital Berlin. For this purpose, we subset the district data and mask and crop data on foreigner shares from the German census.
 
 :::: columns
 ::: {.column width="50%"}
@@ -610,7 +610,7 @@ plot(foreigners_berlin)
 
 ## It's easy
 
-Although, we already can identify high density areas using the raw data, some smoothing may be helpful. We can use the `terra::focal()` function to do that. It applies a moving window filter on all raster cells of a grid. We'll have a more detailed look at this function in a minute.
+Although we can identify some clusters using the raw data, some smoothing may be helpful. We can use the `terra::focal()` function to do that. It applies a moving window filter on all raster cells of a grid. We'll have a more detailed look at this function in a minute.
 
 :::: columns
 ::: {.column width="50%"}
@@ -646,9 +646,9 @@ plot(foreigners_berlin_smooth)
 :::
 ::::
 
-## Real point pattern analysis
+## 'Real' point pattern analysis
 
-Usually, when we talk about heat maps we mean analyzing point patterns and whether they spatially cluster. `terra` might not actually be your best choice when it comes to more elaborated techniques to estimate density kernels and distance base bandwidths between points to draw clusters. For this purpose, packages such as `spatstat` are well more suited but they require learning about other data structures.[^https://r-spatial.org/book/11-PointPattern.html] That said, densities are more advanced ways of counting things in raster grid cells, and we can mimic this behavior also with `terra`. So let's stick to this package and crop our points to the extent of Berlin.
+Usually, when we talk about heat maps, we mean analyzing point patterns and whether they spatially cluster. `terra` might not be your best choice regarding more elaborated techniques to estimate density kernels and distance base bandwidths between points to draw clusters. For this purpose, packages such as `spatstat` are better suited but require [learning about other data structures](https://r-spatial.org/book/11-PointPattern.html). That said, densities are more advanced ways of counting things in raster grid cells, and we can mimic this behavior also with `terra`. So, let's stick to this package and crop all of our points to the extent of Berlin.
 
 :::: columns
 ::: {.column width="50%"}
@@ -661,7 +661,10 @@ points_berlin <-
   ) |>  
   sf::st_crop(berlin)
 
-plot(sf::st_geometry(points_berlin))
+plot(
+  points_berlin["foreigner"], 
+  col = c("black", "green")
+)
 ```
 :::
 
@@ -675,14 +678,17 @@ points_berlin <-
   ) |>  
   sf::st_crop(berlin)
 
-plot(sf::st_geometry(points_berlin))
+plot(
+  points_berlin["foreigner"], 
+  col = c("black", "green")
+)
 ```
 :::
 ::::
 
 ## Creating a raster density template
 
-Next, for our density estimation we simply want to count points with the attribute `foreigner = 1` in raster grid cells. However, our point are unfortunately a bit sparse compared to our comprehensive raster dataset. We cannot rely on 1 km² grid cells initially as with the foreigner grid data. But 5 km² may be a good compromise. Let's do that!
+Next, we simply want to count points with the attribute `foreigner = 1` in raster grid cells for our density estimation. However, our points are sparse compared to our comprehensive raster dataset. We cannot initially rely on 1 km² grid cells as with the Census grid data. But 5 km² may be a good compromise. Let's do that!
 
 ```{r}
 raster_template <-
@@ -697,7 +703,7 @@ raster_template
 
 ## Why the hassle?
 
-You may wonder why we are doing that. The answer is simple: We want to count the number of points in each of the grid cells. We use the function `terra::rasterize()` as a simple technique.
+You may wonder why we are doing that. The answer is simple: We want to count the number of points in each grid cell. We use the function `terra::rasterize()` as a simple technique.
 
 :::: columns
 ::: {.column width="50%"}
@@ -735,13 +741,13 @@ plot(points_berlin_density)
 
 ## Again, why the hassle?
 
-Now, you may think this is disappointing. These data looks... not good. But fear not, working with raster data is powerful, as we now use a function you already now for projecting one CRS into another: `terra::project()`. This function can also be used to aggregate and disaggregate data based on the structure of another dataset. So, while we were not able to use 1 km² grid cells for our density 'estimation' initially, we can reproject our 5 km² onto a 1 km² grid like our foreigners grid. A bit of masking also helps in getting rid of cells that are not within the border of Berlin
+Now, this is not very pleasant. These data looks... not good. But fear not, working with raster data is powerful, as we now use a function you already know for projecting one CRS into another: `terra::project()`. This function can also be used to aggregate and disaggregate data based on the structure of another dataset. So, while we could not initially use 1 km² grid cells for our density 'estimation', we can reproject our 5 km² onto a 1 km² grid like our Census grid data. A bit of masking also helps get rid of cells that are not within the Berlin border.
 
 :::: columns
 ::: {.column width="50%"}
 ```{r}
 #| eval: false
-#| fig.asp: .6
+#| fig.asp: .55
 points_berlin_density <-
   points_berlin_density |> 
   terra::project(foreigners_berlin) |> 
@@ -754,7 +760,7 @@ plot(points_berlin_density)
 ::: {.column width="50%"}
 ```{r}
 #| echo: false
-#| fig.asp: .6
+#| fig.asp: .55
 points_berlin_density <-
   points_berlin_density |> 
   terra::project(foreigners_berlin) |> 
@@ -860,13 +866,13 @@ focal(
 
 ## What is this argument `w`?
 
-It's magic. Just kidding, but it is indeed really powerful. And it makes weird stuff, particularly with our point based densities. It builds around the idea of connecting the value of a focal grid cell to the values of surrounding grid cells, as in the figure below. Hence, the name of the function `terra::focal()` where the argument is used
+It's magic. Just kidding, but it is indeed really powerful. It builds around the idea of connecting the value of a focal grid cell to the values of surrounding grid cells, as in the figure below. Hence, the name of the function `terra::focal()` where the argument is used.
 
 ![](../img/fig_linking_focal_immigrants.png){.r-stretch fig-align="center"}
 
 ## It's just a simple base `R` matrix
 
-When using this matrix as input and applying the statistic `fun = mean`, we simply change the value of the focal grid cell to the mean of the values of itself and the 8 surrounding grid cells. That's what we did before in one example.
+When using this matrix as input and applying the statistic `fun = mean`, we change the value of the focal grid cell to the mean of the values of itself and the 8 surrounding grid cells. That's what we did before in one example.
 
 ```{r}
 matrix(1, 5, 5)
@@ -912,13 +918,13 @@ focal(
 
 ## Real life example: Edges of immigrant rates
 
-In ethnic diversity research, it is a relevant question as to whether sudden changes in the neighborhood composition may rise the potential of conflicts between groups. Researchers use edge detection algorithms from image processing to investigate such changes spatially.
+In ethnic diversity research, whether sudden changes in the neighborhood composition may increase the potential for conflicts between groups is a relevant question. Researchers use edge detection algorithms from image processing to investigate such changes spatially.
 
 ![](../img/legewie_schaeffer_2016.png){.r-stretch fig-align="center"}
 
 ##  What is edge detection?
 
-Edge detection identifies sudden changes in colors in an image to 'draw' borders of things that are in a picture. Here's an example of the prominent Sobel filter.
+Edge detection identifies sudden color changes in an image to 'draw' borders of things in a picture. Here's an example of the prominent Sobel filter.
 
 :::: columns
 ::: {.column width="50%"}
@@ -941,7 +947,7 @@ $$r_x = \begin{bmatrix}1 & 0 & -1 \\2 & 0 & -2 \\1 & 0 & -1\end{bmatrix} \times 
 
 ## Implementation in R
 
-...we can easily translate it to be used in `terra::focal()`^[http://search.r-project.org/R/library/terra/html/focal.html]:
+...we can easily translate it to be used in `terra::focal()`^[http://search.r-project.org/R/library/terra/html/focal.html].
 
 ```{r}
 sobel <- function(r) {
@@ -957,7 +963,7 @@ foreigners_berlin_edges <- sobel(foreigners_berlin_smooth)
 
 ## Comparison
 
-We can now clearly display the edges of sudden changes in population sizes within the city of Berlin!
+We can now clearly display the edges of sudden changes in neighborhood composition within Berlin.
 
 ```{r}
 #| echo: true
