@@ -2,7 +2,7 @@
 title: "(Vector and) Raster Data in R"
 subtitle: "Advanced Geospatial Data Processing for Social Scientists"
 author: "Dennis Abel & Stefan Jünger"
-date: April 29, 2025
+date: April 28, 2025
 execute:
   echo: true
 format:
