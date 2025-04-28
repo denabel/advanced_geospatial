@@ -41,13 +41,13 @@ course_content |>
 
 ## Datacubes
 
-Yesterday, we worked with single layers of raster data. Today, we turn towards the more complex raster stacks or datacubes. Essentially we add one or more dimension(s) to our data object. This increases complexity - for humans and machines. 
+Yesterday, we worked with single layers of raster data. Today, we turn towards the more complex **raster stacks or datacubes**. Essentially we add one or more dimension(s) to our data object. This increases complexity - for humans and machines. 
 
 Our goal for today is to:
 
-- Understand the logic of raster stacks and datacubes
-- Be able to stack multiple raster layers into a coherent raster stack or datacube
-- Be able to navigate and process the spatial and temporal dimensions
+- Understand the **logic of raster stacks and datacubes**
+- Be able to **stack multiple raster layers** into a coherent raster stack or datacube
+- Be able to navigate and process the **spatial and temporal dimensions**
 - Familiarize ourselves with the `stars` and `terra` packages for raster processing
 
 
@@ -66,7 +66,7 @@ If you want to do anything in `R`, you need to use functions, and functions are 
 ::: {.column width="80%"}
 [`terra`](https://rspatial.github.io/terra/index.html) (and its predecessor `raster`) by Robert Hijmans is probably the most commonly used package for raster data in `R` (and equally relevant for vector data).
 
-Methods for vector data include geometric operations such as intersect and buffer. Raster methods include local, focal, global, zonal and geometric operations. The predict and interpolate methods facilitate the use of regression type (interpolation, machine learning) models for spatial prediction, including with satellite remote sensing data.
+Methods for vector data include geometric operations such as intersect and buffer. Raster methods include local, focal, global, zonal and geometric operations. The predict and interpolate methods facilitate the use of regression type (interpolation, machine learning) models for spatial prediction.
 
 The authors have produced a very extensive [tutorial](https://rspatial.org/) which is basically a textbook for spatial data science in R.
 :::
@@ -101,7 +101,9 @@ Edzer Pebesma's and Roger Bivand's [Spatial Data Science](https://r-spatial.org/
 
 ## Similarities and differences between `terra` and `stars`
 
-- With `terra`, we create three-dimensional stacks of raster layers, were the third dimension is often (not always) time - in contrast, `stars` objects can be multi-dimensional and can store more dimensions (e.g. several variables)
+- With `terra`, we create **three-dimensional stacks of raster layers** 
+- There is no need for a coherent logic for what this third dimension constitutes - as long as the single raster layers **fit to each other** (spatial extent, resolution, CRS)
+- In contrast, `stars` objects can be **multi-dimensional** and can store many variables (attributes) along the three dimensions x, y and time
 - Major difference: `terra` doesn't treat the third dimension (time or band) as a "dimension" in the same way `stars` does.
 - Time is encoded via layer names or separate metadata in `terra` objects — you manage it manually.
 
@@ -192,7 +194,7 @@ You know that we can utilize the base `R` `plot` function to visualize `SpatRast
 ::: {.column width="50%"}
 ```{r}
 #| eval: false
-#| fig.asp: 1
+#| fig.asp: 0.8
 # Have a first glance at the data
 terra::plot(CA_pop_stack)
 ```
@@ -201,7 +203,7 @@ terra::plot(CA_pop_stack)
 ::: {.column width="50%"}
 ```{r}
 #| echo: false
-#| fig.asp: 1
+#| fig.asp: 0.8
 # Have a first glance at the data
 terra::plot(CA_pop_stack)
 ```
@@ -211,7 +213,7 @@ terra::plot(CA_pop_stack)
 
 ## `terra` approach: stacking raster layers
 
-Dates can be assigned to the layers. This will effectively create a new attribute in the object IN ADDITION to the name of the variable.
+Dates can be assigned to the layers. This will effectively create a new attribute in the object **IN ADDITION** to the name of the variable.
 
 ```{r}
 layer_dates <- as.Date(paste0(2017:2020, "-01-01"))
@@ -233,7 +235,7 @@ When plotting the raster stack, by default the machine understands to access the
 ::: {.column width="50%"}
 ```{r}
 #| eval: false
-#| fig.asp: 1
+#| fig.asp: 0.8
 # Have a first glance at the data
 terra::plot(CA_pop_stack)
 ```
@@ -242,7 +244,7 @@ terra::plot(CA_pop_stack)
 ::: {.column width="50%"}
 ```{r}
 #| echo: false
-#| fig.asp: 1
+#| fig.asp: 0.8
 # Have a first glance at the data
 terra::plot(CA_pop_stack)
 ```
@@ -289,7 +291,7 @@ When working with a yearly resolution, it is often consensus to set the date to 
 ::: {.column width="50%"}
 ```{r}
 #| eval: false
-#| fig.asp: 1
+#| fig.asp: 0.8
 # Have a first glance at the data
 terra::plot(CA_pop_stack)
 ```
@@ -298,7 +300,7 @@ terra::plot(CA_pop_stack)
 ::: {.column width="50%"}
 ```{r}
 #| echo: false
-#| fig.asp: 1
+#| fig.asp: 0.8
 # Have a first glance at the data
 terra::plot(CA_pop_stack)
 ```
@@ -390,7 +392,7 @@ If you want to reproject the data, you can utilize `project` as before. Here, we
 ::: {.column width="50%"}
 ```{r}
 #| eval: false
-#| fig.asp: 1
+#| fig.asp: 0.8
 # Have a first glance at the data
 terra::plot(CA_pop_stack)
 ```
@@ -399,7 +401,7 @@ terra::plot(CA_pop_stack)
 ::: {.column width="50%"}
 ```{r}
 #| echo: false
-#| fig.asp: 1
+#| fig.asp: 0.8
 # Have a first glance at the data
 terra::plot(CA_pop_stack)
 ```
@@ -409,28 +411,148 @@ terra::plot(CA_pop_stack)
 
 ## Note on reprojecting raster data
 
-Transforming (projecting) raster data is fundamentally different from transforming vector data. Vector data can be transformed and back-transformed without loss in precision and without changes in the values. This is not the case with raster data. In each transformation the values for the new cells are estimated in some fashion. Therefore, if you need to match raster and vector data for analysis, you should generally transform the vector data.
+Reprojecting raster data is fundamentally different from reprojecting vector data:
+
+- Vector data can be transformed and back-transformed **without loss of precision**. The coordinates of points, lines, or polygons are recalculated exactly, and attribute values remain unchanged.
+- Raster data, in contrast, requires **resampling**: when reprojected, the original pixel values must be interpolated or aggregated to fit a new grid.
+- As a result, every **reprojection** of a raster involves **estimation** and may lead to **changes or smoothing** of the original cell values.
+- **Practical advice**: When aligning raster and vector data, **it is usually better to reproject the vector data** onto the raster’s coordinate system — to avoid unnecessary loss or distortion in the raster values.
 
 
 ## `terra` approach: stacking raster layers
 
-Now that we have properly prepared variable names and times, we have several options to access single layers.
+Now that we have properly prepared variable names and times, we have several options to access single layers or specific cell values.
+
+In the beginning, usage of double `[[i]]` and single `[i]` brackets is a bit confusing.
+
+- `[[i]]` is used for accessing layers based on names and index
+- `[i]` generally used for accessing cell values 
+- **Exception to the rule**: `[i]` also works on layer names and time provided as strings
+
+This generally leads to:
+
+- `your_raster[[layer]]`
+- `your_raster[cell]`
+- `your_raster[[layer]][cell]`
+
+
+## `terra` approach: stacking raster layers
+
+Now that we have properly prepared variable names and times, we have several options to access single layers or specific cell values.
+
+Accessing **layers**:
 
 ```{r}
 # Indexing by layer index number
+# Returns SpatRaster
 CA_pop_stack[[1]]
 
-# Indexing by layer name
-CA_pop_stack["pop_2018"]
+# Give me layers 1 to 3
+CA_pop_stack[[1:3]]
 
-# Indexing by time point
+# Give me layers 1 and 3 
+CA_pop_stack[[c(1,3)]]
+
+# Indexing by layer name
+# Returns SpatRaster
+CA_pop_stack[["pop_2018"]]
+
+# Indexing by time point 
+# !only single brackets work!
+# Returns SpatRaster
 CA_pop_stack["2019"]
 ```
 
 
 ## `terra` approach: stacking raster layers
 
-Now that we have properly prepared variable names and times, we have several options to access single layers.
+Now that we have properly prepared variable names and times, we have several options to access single layers or specific cell values.
+
+Accessing **cells**:
+
+```{r}
+# Give me all values
+# Returns data.frame
+CA_pop_stack[]
+
+# Give me values for cell numbers 700,000 for all layers
+# Returns data.frame
+CA_pop_stack[700000]
+
+# Give me values for cell numbers 700,000-700,010 for all layers
+# Returns data.frame
+CA_pop_stack[700000:700010]
+
+# Give me values for cell numbers 700,000 and 700,010 for all layers
+CA_pop_stack[c(700000,700010)]
+```
+
+
+## `terra` approach: stacking raster layers
+
+Now that we have properly prepared variable names and times, we have several options to access single layers or specific cell values.
+
+**Combinations**: 
+
+```{r}
+# Give me value for cell index 700,000 for layer 4
+# Returns data.frame
+class(CA_pop_stack[[4]][700000])
+             
+# Give me all values for layer with time "2019"
+# Returns data.frame / array
+CA_pop_stack[[1]][]
+```
+
+
+## `terra` approach: stacking raster layers
+
+Now that we have properly prepared variable names and times, we have several options to access single layers or specific cell values.
+
+Alternatively, you can use **array slicing syntax** on `SpatRaster` objects:
+
+```{r}
+#| eval: false
+your_raster[i, # rows
+            i, # columns
+            i, # layers
+            drop = FALSE/TRUE # whether to keep `SpatRaster`geometry
+            ]
+```
+
+
+## `terra` approach: stacking raster layers
+
+Now that we have properly prepared variable names and times, we have several options to access single layers or specific cell values.
+
+Alternatively, you can use array slicing syntax on `SpatRaster`objects:
+
+:::: columns
+::: {.column width="50%"}
+```{r}
+CA_pop_stack[500:1000,
+             500:1000, 
+             1,
+             drop = FALSE
+             ]
+```
+:::
+
+::: {.column width="50%"}
+```{r}
+CA_pop_stack[500:1000,
+             500:1000, 
+             1,
+             drop = TRUE # default
+             ]
+```
+:::
+::::
+
+
+## `terra` approach: stacking raster layers
+
+Now that we have properly prepared variable names and times, we have several options to access single layers or specific cell values.
 
 :::: columns
 ::: {.column width="50%"}
@@ -438,7 +560,10 @@ Now that we have properly prepared variable names and times, we have several opt
 #| eval: false
 #| fig.asp: 1
 # Plot a single layer
-terra::plot(CA_pop_stack[[1]])
+terra::plot(CA_pop_stack[0:500,
+                         0:500, 
+                         1,
+                         drop = FALSE])
 ```
 :::
 
@@ -447,7 +572,10 @@ terra::plot(CA_pop_stack[[1]])
 #| echo: false
 #| fig.asp: 1
 # Plot a single layer
-terra::plot(CA_pop_stack[[1]])
+terra::plot(CA_pop_stack[0:500,
+                         0:500, 
+                         1,
+                         drop = FALSE])
 ```
 :::
 ::::
@@ -482,7 +610,7 @@ writeRaster(
 
 ## Exercise 5_1: A raster stack with `terra`
 
-[Exercise](https://stefanjuenger.github.io/gesis-workshop-geospatial-techniques-R-2025/exercises/5_2_The_Perfect_Map.html)
+![](../img/cat_scientist.png){fig-align="center" width="40%"}
 
 
 ## `stars` approach: stacking raster layers
@@ -691,7 +819,7 @@ print(CA_pop_cube)
 
 ## `stars` approach: stacking raster layers
 
-Indexing `stars` objects differs a bit compared to `SpatRaster`. Given that `stars`objects can store more than one attribute (variable), we need to consider four levels:
+Indexing `stars` objects differs a bit compared to `SpatRaster`. Given that `stars` objects can store more than one attribute (variable), we need to consider four levels:
 
 ```{r}
 # Return stars object and drop all attributes except "population"
@@ -766,16 +894,15 @@ write_stars(CA_pop_cube,
 
 ## Converting between `terra` and `stars`
 
-**NOCHMAL CHECKEN - HIER IST WAS FALSCH**
 In theory, converting between `terra` and `stars` objects is simple. This will preserve most crucial information on cell values, spatial extent, and CRS. It can, however, mess around with your neatly prepared metadata.
 
 ```{r}
 # Tranform terra SpatRaster into stars object
-# CA_pop_stack_stars <- stars::st_as_stars(CA_pop_stack)
-# 
-# class(CA_pop_stack_stars)
-# 
-# print(CA_pop_stack_stars)
+CA_pop_stack_stars <- stars::st_as_stars(CA_pop_stack)
+
+class(CA_pop_stack_stars)
+
+print(CA_pop_stack_stars)
 ```
 
 
@@ -785,14 +912,16 @@ In theory, converting between `terra` and `stars` objects is simple. This will p
 
 ```{r}
 # Tranform stars object into terra SpatRaster
-# CA_pop_cube_terra <- terra::rast(CA_pop_cube)
-# 
-# class(CA_pop_cube_terra)
-# 
-# print(CA_pop_cube_terra)
+# Terra has problems with handling stars time-dimension -> transform into attribute
+cube_prepped <- split(CA_pop_cube, "time")
+CA_pop_cube_terra <- terra::rast(cube_prepped)
+
+class(CA_pop_cube_terra)
+
+print(CA_pop_cube_terra)
 ```
 
 
 ## Exercise 5_2: A raster cube with `stars`
 
-[Exercise](https://stefanjuenger.github.io/gesis-workshop-geospatial-techniques-R-2025/exercises/5_2_The_Perfect_Map.html)
+![](../img/cat_measure.png){fig-align="center" width="40%"}
