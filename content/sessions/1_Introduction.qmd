@@ -260,7 +260,7 @@ In the folder called `./data`, you can find (most of) the data files prepared fo
 
 - Administrative borders of Germany (Prefix *VG250\_*) are provided by the German [Federal Agency for Cartography and Geodesy](http://www.bkg.bund.de) (2018). Check out their [Open Data Portal](https://gdz.bkg.bund.de/index.php/default/open-data.html).
 
-- German Census 2022 data are provided by the [Federal Statistical Office Germany, Wiesbaden 2024](https://www.zensus2022.de). We used our colleague [Jonas Lieth](https://www.gesis.org/institut/ueber-uns/mitarbeitendenverzeichnis/person/Jonas.Lieth)'s (experimental) `R`package [`z22`](https://github.com/JsLth/z22) to gather the data for you. If you're stuck using the data, `z22::z22_categories()` may help you (e.g., `z22::z22_categories("foreigners)`).
+- German Census 2022 data are provided by the [Federal Statistical Office Germany, Wiesbaden 2024](https://www.zensus2022.de). We used our colleague [Jonas Lieth](https://www.gesis.org/institut/ueber-uns/mitarbeitendenverzeichnis/person/Jonas.Lieth)'s (experimental)  `R`package [`z22`](https://github.com/JsLth/z22) to gather the data for you. If you're stuck using the data, `z22::z22_categories()` may help you (e.g., `z22::z22_categories("foreigners)`).
 
 
 ## Geospatial data in this course II
@@ -505,18 +505,15 @@ We will use plenty of different packages during the course, but only a few are o
 -   [`ggplot2`](https://cran.r-project.org/web/packages/ggplot2/index.html)
 -   [`ggrepel`](https://cran.r-project.org/web/packages/ggrepel/index.html)
 -   [`ggspatial`](https://cran.r-project.org/web/packages/ggspatial/index.html)
+-   [`haven`](https://cran.r-project.org/web/packages/haven/index.html)
 -   [`randomForest`](https://cran.r-project.org/web/packages/randomForest/index.html)
 -   [`readr`](https://cran.r-project.org/web/packages/readr/index.html)
--   [`scales`](https://cran.r-project.org/web/packages/scales/index.html)
-
 
 ## Packages in this course II `r emo::ji("package")`
 
+
+-   [`scales`](https://cran.r-project.org/web/packages/scales/index.html)
 -   [`sf`](https://cran.r-project.org/web/packages/sf/index.html)
--   [`spatialreg`](https://cran.r-project.org/web/packages/spatialreg/index.html)
--   [`spatstat`](https://cran.r-project.org/web/packages/spatstat/index.html)
--   [`sfdep`](https://cran.r-project.org/web/packages/sfdep/index.html)
--   [`spdep`](https://cran.r-project.org/web/packages/spdep/index.html)
 -   [`stars`](https://cran.r-project.org/web/packages/stars/index.html)
 -   [`terra`](https://cran.r-project.org/web/packages/terra/index.html)
 -   [`tidyterra`](https://cran.r-project.org/web/packages/tidyterra/index.html)
