@@ -75,7 +75,7 @@ You could also transform the polygons instead of the points — it depends on wh
 library(sf)
 
 # Load polygon data
-polygon_data <- sf::st_read("../../data/VG250_KRS.shp", quiet = TRUE)
+polygon_data <- sf::st_read(".data/VG250_KRS.shp", quiet = TRUE)
 
 # Explore the object
 print(polygon_data)        # View basic information
@@ -112,7 +112,7 @@ library(sf)
 library(readr)
 
 # Load the table
-coords_df <- read_csv("../../data/synthetic_coordinates.csv")
+coords_df <- read_csv("./data/synthetic_coordinates.csv")
 
 # Convert to sf object
 points_sf <- 
@@ -132,14 +132,14 @@ library(sf)
 library(readr)
 
 # Load the table
-coords_df <- read_csv("../../data/synthetic_coordinates.csv")
+coords_df <- readr::read_csv("../../data/synthetic_coordinates.csv")
 
 # Convert to sf object
 points_sf <- 
   sf::st_as_sf(
     coords_df,
     coords = c("x", "y"),
-    crs = 4326
+    crs = 3035
   )
 
 # Optional: visualize it!
