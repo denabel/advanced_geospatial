@@ -25,6 +25,7 @@ library(sf)
 library(terra)
 ```
 
+
 ## Now
 
 ```{r}
@@ -34,6 +35,49 @@ source("course_content.R")
 course_content |> 
   kableExtra::row_spec(7, background = "yellow")
 ```
+
+
+## Why should we use data visualization?
+
+In general:
+
+- contribute to a better understanding of your analysis results
+- understand your data in the first place
+
+Generating a plot is easy as you will see
+
+... Making good plots, however, can take a while
+
+
+## Visual display of quantitative information
+
+Check out [Edward Tufte's](https://www.edwardtufte.com/tufte/) work on data visualization to achieve **graphical excellence**. It is a *minimalist* approach to visualization which **maximizes the proportion of data-ink** to total ink in a plot. [Tufte in R](http://motioninsocial.com/tufte/) offers many examples how to translate Tufte's perspective into graphs in R.
+
+:::: columns
+::: {.column width="50%"}
+![](../img/edward_tufte.JPG){fig-align="center" width="80%"}
+
+[Source](https://www.edwardtufte.com/tufte/)
+:::
+
+::: {.column width="50%"}
+**"The Leonardo da Vinci of data."** - *THE NEW YORK TIMES*
+:::
+::::
+
+
+## Avoid chartjunk
+
+![](../img/chartjunk1.png){fig-align="center" width="80%"}
+
+Source: [Healy 2018, Ch 1, Figure 1.4: A chart with a considerable amount of junk in it](https://socviz.co/lookatdata.html)
+
+
+## Reduce data-ink example
+
+![](../img/data_ink_example.JPG){fig-align="center" width="80%"}
+
+Source: [https://bookdown.org/paul/applied-data-visualization/03-the-quality-of-graphs.html#fig-tufte-boxplot](https://bookdown.org/paul/applied-data-visualization/03-the-quality-of-graphs.html#fig-tufte-boxplot)
 
 
 ## What is `ggplot2`?
