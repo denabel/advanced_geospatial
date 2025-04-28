@@ -695,7 +695,7 @@ dates <- as.Date(paste0(2017:2020, "-01-01"))
 
 ## `stars` approach: stacking raster layers
 
-We can apply the `merge`-function on our existing datacube to integrate the four attributes into one by supplying the dates:
+The `split()` and `merge()` functions allow us to switch dimensions to attributes and the other way round. We can apply the `merge()`-function on our existing datacube to integrate the four attributes into one by supplying the dates:
 
 ```{r}
 cube_merged <- merge(CA_pop_cube, f = dates, name = "time")
@@ -797,21 +797,38 @@ Access to the CRS is easy with `st_crs`. The EPSG code is not supplied as string
 ```{r}
 # CRS
 st_crs(CA_pop_cube)
-# to label is missing - not to reproject
+
+# to label if CRS missing - not to reproject
 # st_crs(CA_pop_cube) <- 4326
 ```
 
 
 ## `stars` approach: stacking raster layers
 
-We can reproject the data with `st_warp()`. Default of `use_gdal` argument is `TRUE`. Unfortunately, this will remove our time-dimension metadata assigned earlier. Set it to `FALSE` to preserve that. This has the downside that the native `stars` warp is limited to nearest-neighbor resampling and slower. Alternative is to reassign time-metadata afterwards.
+We can reproject the data with `st_transform()`. This will create a curvilinear grid cell with the advantage that no information is lost - cell values remain identical. This is the case because `st_transform()` reprojects without resampling. 
 
 ```{r}
-CA_pop_cube <- st_warp(CA_pop_cube, 
-                       crs = 3310,
-                       cellsize = NA_real_,
-                       use_gdal = FALSE # to preserve time-dimension metadata
-                       )
+CA_pop_cube_curv <- sf::st_transform(CA_pop_cube, 
+                                     crs = 3310
+                                     )
+
+print(CA_pop_cube_curv)
+```
+
+
+## `stars` approach: stacking raster layers
+
+Alternative to obtain a regular grid is to create a workaround with  `st_warp()`. We first specify the target grid with same number of rows and colums and "warp" into that grid.
+
+```{r}
+grid <- st_bbox(CA_pop_cube) |>
+  st_as_sfc() |>
+  st_transform(crs = 3310) |>
+  st_bbox() |>
+  st_as_stars(nx = dim(CA_pop_cube)["x"], 
+              ny = dim(CA_pop_cube)["y"])
+
+CA_pop_cube <- st_warp(CA_pop_cube, grid)
 
 print(CA_pop_cube)
 ```
