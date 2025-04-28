@@ -66,6 +66,24 @@ We will show the use of packages we exploit in practice
 :::
 :::::
 
+## About us (Dennis)
+
+::::: columns
+::: {.column width="30%"}
+![](../img/Dennis.png){fig-align="center" width="75%"}
+:::
+
+::: {.column width="60%"}
+-   Postdoctoral Researcher in the team Survey Data Augmentation at the GESIS department Survey Data Curation
+-   Ph.D. in Political Economy, University of Cologne
+-   Research interests:
+    -   Quantitative methods, Geographic Information Systems (GIS)
+    -   Environmental attitudes and behavior
+    -   Public policy
+    -   Open source software
+:::
+:::::
+
 ## About us (Stefan)
 
 ::::: columns
@@ -82,24 +100,6 @@ We will show the use of packages we exploit in practice
     -   Attitudes towards minorities
     -   Environmental attitudes
     -   Reproducible research
-:::
-:::::
-
-## About us (Dennis)
-
-::::: columns
-::: {.column width="30%"}
-![](../img/Dennis.png){fig-align="center" width="75%"}
-:::
-
-::: {.column width="60%"}
--   Postdoctoral Researcher in the team Survey Data Augmentation at the GESIS department Survey Data Curation
--   Ph.D. in Political Economy, University of Cologne
--   Research interests:
-    -   Quantitative methods, Geographic Information Systems (GIS)
-    -   Environmental attitudes and behavior
-    -   Public policy
-    -   Open source software
 :::
 :::::
 
