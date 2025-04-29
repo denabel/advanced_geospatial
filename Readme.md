@@ -1,13 +1,5 @@
 # Workshop "Advanced Geospatial Data Processing for Social Scientists" (April 28/29, 2025)
 
-<p align=center>   
-<a href="https://github.com/denabel/advanced_geospatial"><b>CLICK HERE FOR DOWNLOAD ALL COURSE MATERIALS</b></a> 
-</p>
-
-<p align=center>   
-<a href="https://github.com/denabel/advanced_geospatial"><b>CLICK HERE FOR AN UNCLUTTERED VIEW</b></a> 
-</p>
-
 Materials for the GESIS workshop "Advanced Geospatial Data Processing for Social Scientists" 
 
 Dennis Abel (dennis.abel@gesis.org) & [Stefan Jünger](https://stefanjuenger.github.io) (stefan.juenger@gesis.org)
