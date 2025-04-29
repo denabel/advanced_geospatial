@@ -1,0 +1,37 @@
+---
+title: "Exercise 6_2: Illuminate your region"
+subtitle: 'Advanced Geospatial Data Processing for Social Scientists'
+author: Dennis Abel & Stefan Jünger
+format: 
+  html:
+    embed-resources: true
+    code-copy: true
+execute:
+  echo: true
+editor: visual
+callout-icon: false
+callout-appearance: minimal
+---
+
+### Exercises
+
+This is our last exercise - you can apply many of the discussed processing steps from the last two days now.
+
+::: callout-note
+## `r emo::ji("weight_lifting_man")` Exercise 1
+
+This is an open exercise. We challenge you to apply your knowledge on spatial vector and raster processing to create your own spatial raster stack or cube on nighttime lights with the spatial and temporal resolution of your choice.
+
+1. We have introduced several datasets on administrative borders in Germany and the USA. Some are stored in the data folder, others are retrievable with the discussed packages. Choose one of these data sources to set up the region you want to study. Retrieve your `sf` object and subset it to the region you want to study.
+
+2. Revise the [blackmarbler](https://worldbank.github.io/blackmarbler/) set up conditions. Set up your own account and retrieve your bearer token.
+
+3. Prepare your input file (CRS!).
+
+4. Set up the API access and retrieve the data of your choice.
+
+5. Once you have downloaded your nightlights data, check and clean the metadata (if applicable).
+
+6. Mask the raster file based on your selected region (if applicable).
+
+7. Visualize your nightlights data in combination with your region data. Use facets if you have downloaded longitudinal data.

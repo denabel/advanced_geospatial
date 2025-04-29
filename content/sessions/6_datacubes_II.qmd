@@ -42,7 +42,11 @@ course_content |>
 
 ## Datacubes - continued
 
-Building on the introduction to data stacks and cubes in `R`, we now want to dig deeper into wrangling with these objects. We will cover more advanced raster operations and have a case study on accessing remote sensing data from an API. But first, we will briefly revise visualizing with `ggplot` - this time with our raster stacks/cubes.
+Building on the introduction to data stacks and cubes in `R`, we now want to dig deeper into wrangling with these objects. We will:
+
+- cover more advanced raster operations,
+- have a case study on accessing remote sensing data from an API,
+- and we will briefly revise visualizing with `ggplot` - this time with our raster stacks/cubes.
 
 
 ## Visualizing datacubes
@@ -125,7 +129,9 @@ library(tidyterra)
 library(scales)
 
 ggplot()+
-  geom_spatraster(data = CA_pop_stack, aes(fill = pop_2017))+
+  geom_spatraster(data = CA_pop_stack, 
+                  aes(fill = pop_2017)
+                  )+
   scale_fill_viridis_c(na.value = "transparent",
                        name = "Pop count",
                        limits = c(0, 2000),
@@ -142,7 +148,9 @@ library(tidyterra)
 library(scales)
 
 ggplot()+
-  geom_spatraster(data = CA_pop_stack, aes(fill = pop_2017))+
+  geom_spatraster(data = CA_pop_stack, 
+                  aes(fill = pop_2017)
+                  )+
   scale_fill_viridis_c(na.value = "transparent",
                        name = "Pop count",
                        limits = c(0, 2000),
@@ -408,7 +416,9 @@ ggplot() +
 #| echo: false
 #| fig.asp: 1
 ggplot() +
-  geom_stars(data = CA_pop_cube[,,,1], aes(fill = population)) +
+  geom_stars(data = CA_pop_cube[,,,1], 
+             aes(fill = population)
+             ) +
   scale_fill_viridis_c(na.value = "transparent",
                        name = "Pop count",
                        limits = c(0, 2000),
@@ -430,7 +440,9 @@ With `facet_wrap`, we can create a combination of several layers into one plot. 
 #| eval: false
 #| fig.asp: 1
 ggplot() +
-  geom_stars(data = CA_pop_cube, aes(fill = population)) +
+  geom_stars(data = CA_pop_cube, 
+             aes(fill = population)
+             ) +
   scale_fill_viridis_c(na.value = "transparent",
                        name = "Pop count",
                        limits = c(0, 2000),
@@ -460,7 +472,9 @@ ggplot() +
 #| echo: false
 #| fig.asp: 1
 ggplot() +
-  geom_stars(data = CA_pop_cube, aes(fill = population)) +
+  geom_stars(data = CA_pop_cube, 
+             aes(fill = population)
+             ) +
   scale_fill_viridis_c(na.value = "transparent",
                        name = "Pop count",
                        limits = c(0, 2000),
@@ -501,6 +515,27 @@ Now that we have established an understanding of raster stacks and cubes in `R`,
 - how to wrangle with that data. 
 
 In particular, we will focus on working with and "harmonizing" raster layers with different spatial properties.
+
+
+## APIs
+
+Geospatial data tend to be quite big, and there's a pressure to distribute data efficiently. Data dumps (on the internet) may not be helpful 
+
+- When resources are low 
+- Time's a factor
+- The data have a large geographic extent
+
+Instead, a *Programming Application Interface* (API) is often used.
+
+## Data providers offering geospatial data APIs
+
+- [OpenStreetMap](https://wiki.openstreetmap.org/wiki/API)
+- [Google](https://developers.google.com/maps/documentation/geolocation/overview)
+- [Bing](https://docs.microsoft.com/en-us/bingmaps/rest-services/locations/)
+- [Copernicus Climate Data Store](https://cds.climate.copernicus.eu/)
+- ...
+- [Cologne's Open Data Portal](https://www.offenedaten-koeln.de/dataset/taxonomy/term/44/field_tags/Geo-44)
+- Specialized `R` packages, such as the [`wiesbaden` package](https://cran.r-project.org/web/packages/wiesbaden/index.html) or the [`tidycensus` package](https://cran.r-project.org/web/packages/tidycensus/index.html)
 
 
 ## R package `blackmarbler`
@@ -779,6 +814,11 @@ print(LA_nl_2020)
 
 ## Layers with different properties
 
+TL;DR - We show you the "manual" approach to align the two layers on the next slides. In the end, you can utilize `terra::project()` on two raster layers to perform these separate steps at once: 1. Align CRS, 2. adjust resolution, and 3. equalize spatial extent.
+
+
+## Layers with different properties
+
 Most simple solution to harmonize: If cell sizes are multiples (which is the case in our example), we can use `terra::disagg()` or `terra::aggregate()` to adjust resolution of one layer to resolution of another.
 
 First option: Increase resolution for population data
@@ -980,7 +1020,7 @@ global(LA_stack, fun = mean, na.rm=TRUE)
 layerCor(LA_stack, fun = "cor", use = "complete.obs")
 ```
 
-## Exercise 6_2: Combining different layers
+## Exercise 6_2: Illuminate your region
 
 ![](../img/cat_scientist.png){fig-align="center" width="50%"}
 

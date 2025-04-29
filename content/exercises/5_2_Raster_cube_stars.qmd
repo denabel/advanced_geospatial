@@ -21,7 +21,6 @@ We are deliberately boring in this exercise - we want to do exactly the same as 
 ## `r emo::ji("weight_lifting_man")` Exercise 1
 
 Load the four population raster layers for Texas 2017-2020 (`./data/US-TX_ppp_2017_1km.tif`-`./data/US-TX_ppp_2020_1km.tif`) with `stars::read_stars()` and integrate these into one raster cube. First, create a file list for all four raster layers. Second, prepare a vector which stores the four years. Finally, you can read in the file list along the list of years.
-
 :::
 
 ::: callout-note
@@ -136,12 +135,12 @@ plot(TX_pop_cube[1,
 ```{r}
 #| eval: false
 # Export
-saveRDS(TX_pop_cube, "./data/CA_pop_cube.rds")
+saveRDS(TX_pop_cube, "./data/TX_pop_cube.rds")
 ```
 
 ```{r}
 #| echo: false
 # Export
-saveRDS(TX_pop_cube, "../../data/CA_pop_cube.rds")
+saveRDS(TX_pop_cube, "../../data/TX_pop_cube.rds")
 ```
 :::
