@@ -554,6 +554,20 @@ library(blackmarbler)
 :::
 ::::
 
+## NASA's Black Marble
+
+![](../img/marble_quality.png){fig-align="center" width="70%"}
+
+[Source](https://appliedsciences.nasa.gov/sites/default/files/2020-12/BlackMarble_2020.pdf)
+
+
+## NASA's Black Marble
+
+![](../img/marble_covid.png){fig-align="center" width="70%"}
+
+[Source](https://appliedsciences.nasa.gov/sites/default/files/2020-12/BlackMarble_2020.pdf)
+
+
 ## Data retrieval
 
 The function `bm_raster()` to retrieve the nighttime lights requires as input an `sf`object to determine the spatial extent of the downloaded data. The object must be in **WGS84**. 
