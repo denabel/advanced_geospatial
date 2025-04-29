@@ -612,8 +612,3 @@ issp_linked |>
   scale_x_continuous(breaks = issp_linked$year) +
   theme_bw()
 ```
-
-## Exercise?
-
-![](../img/cat_quality.webp){width="45%" fig-align="center"}
-
