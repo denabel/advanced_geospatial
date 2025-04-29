@@ -3088,7 +3088,7 @@ vertical-align: -.125em;
 </div>
 </div>
 <div class="callout-body-container callout-body">
-<p>This is an open exercise. We challenge you to apply your knowledge on spatial vector and raster processing to create your own spatial raster stack or cube on nighttime lights with the spatial and temporal resolution of your choice.</p>
+<p>This is an open exercise. We challenge you to apply your knowledge on spatial vector and raster processing to create your own spatial raster stack or cube on nighttime lights with the spatial and temporal resolution of your choice. Here are some ideas you could apply:</p>
 <ol type="1">
 <li><p>We have introduced several datasets on administrative borders in Germany and the USA. Some are stored in the data folder, others are retrievable with the discussed packages. Choose one of these data sources to set up the region you want to study. Retrieve your <code>sf</code> object and subset it to the region you want to study.</p></li>
 <li><p>Revise the <a href="https://worldbank.github.io/blackmarbler/">blackmarbler</a> set up conditions. Set up your own account and retrieve your bearer token.</p></li>
@@ -3097,6 +3097,8 @@ vertical-align: -.125em;
 <li><p>Once you have downloaded your nightlights data, check and clean the metadata (if applicable).</p></li>
 <li><p>Mask the raster file based on your selected region (if applicable).</p></li>
 <li><p>Visualize your nightlights data in combination with your region data. Use facets if you have downloaded longitudinal data.</p></li>
+<li><p>Calculate edges of sudden changes in nightlights to retrieve the borders of high-density areas, possibly just for one single time point to make the exercise less complex.</p></li>
+<li><p>Use <code>sf::st_sample(vector_data_file, size = 100)</code> to sample 100 points in your region. You can link these points to your raster data using the methods we have introduced (1:1, buffer areas, focal areas).</p></li>
 </ol>
 </div>
 </div>

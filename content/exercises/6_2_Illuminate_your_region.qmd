@@ -20,18 +20,23 @@ This is our last exercise - you can apply many of the discussed processing steps
 ::: callout-note
 ## `r emo::ji("weight_lifting_man")` Exercise 1
 
-This is an open exercise. We challenge you to apply your knowledge on spatial vector and raster processing to create your own spatial raster stack or cube on nighttime lights with the spatial and temporal resolution of your choice.
+This is an open exercise. We challenge you to apply your knowledge on spatial vector and raster processing to create your own spatial raster stack or cube on nighttime lights with the spatial and temporal resolution of your choice. Here are some ideas you could apply:
 
-1. We have introduced several datasets on administrative borders in Germany and the USA. Some are stored in the data folder, others are retrievable with the discussed packages. Choose one of these data sources to set up the region you want to study. Retrieve your `sf` object and subset it to the region you want to study.
+1.  We have introduced several datasets on administrative borders in Germany and the USA. Some are stored in the data folder, others are retrievable with the discussed packages. Choose one of these data sources to set up the region you want to study. Retrieve your `sf` object and subset it to the region you want to study.
 
-2. Revise the [blackmarbler](https://worldbank.github.io/blackmarbler/) set up conditions. Set up your own account and retrieve your bearer token.
+2.  Revise the [blackmarbler](https://worldbank.github.io/blackmarbler/) set up conditions. Set up your own account and retrieve your bearer token.
 
-3. Prepare your input file (CRS!).
+3.  Prepare your input file (CRS!).
 
-4. Set up the API access and retrieve the data of your choice.
+4.  Set up the API access and retrieve the data of your choice.
 
-5. Once you have downloaded your nightlights data, check and clean the metadata (if applicable).
+5.  Once you have downloaded your nightlights data, check and clean the metadata (if applicable).
 
-6. Mask the raster file based on your selected region (if applicable).
+6.  Mask the raster file based on your selected region (if applicable).
 
-7. Visualize your nightlights data in combination with your region data. Use facets if you have downloaded longitudinal data.
+7.  Visualize your nightlights data in combination with your region data. Use facets if you have downloaded longitudinal data.
+
+8. Calculate edges of sudden changes in nightlights to retrieve the borders of high-density areas, possibly just for one single time point to make the exercise less complex.
+
+9. Use `sf::st_sample(vector_data_file, size = 100)` to sample 100 points in your region. You can link these points to your raster data using the methods we have introduced (1:1, buffer areas, focal areas).
+:::
