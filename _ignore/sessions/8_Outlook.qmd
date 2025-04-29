@@ -1,0 +1,124 @@
+---
+title: "Outlook"
+subtitle: "Advanced Geospatial Data Processing for Social Scientists"
+author: "Dennis Abel & Stefan Jünger"
+date: April 29, 2025
+execute:
+  echo: true
+format:
+  revealjs:
+    embed-resources: true
+    theme: [simple, tweaks.css]
+    smaller: true
+    scrollable: true
+    slide-number: "c/t"
+    navigation-mode: vertical
+    logo: ../img/GESIS-Logo_2024.svg.png
+    # fig-dpi: 300
+    fig-align: "center"
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r}
+#| include: false
+library(dplyr)
+library(ggplot2)
+library(sf)
+library(terra)
+library(tmap)
+```
+
+## What we have done
+
+```{r}
+#| echo: false
+source("course_content.R") 
+course_content
+```
+
+## What's left
+
+- AI models for detecting objects on satellite images
+- More in-depth temporal linking techniques
+- ...
+- What do you think?
+
+- **More data sources**
+
+
+## Data Sources
+
+Some more information:
+
+- Geospatial data are interdisciplinary
+- Amount of data feels unlimited
+- Data providers and data portals are often specific in the area and/or the information they cover
+
+Some random examples: 
+
+- [Eurostat](https://ec.europa.eu/eurostat/web/gisco/geodata)
+- [European Spatial Data Infrastructure](https://inspire.ec.europa.eu/about-inspire/563)
+- [John Hopkins Corona Data Hub and Dashboard](https://coronavirus.jhu.edu/map.html)
+- [US Census Bureau](https://www.census.gov/geographies/mapping-files/time-series/geo/carto-boundary-file.html)
+
+## EOD Spatial Linking Made Easy
+
+:::: columns
+::: {.column width="50%"}
+Links time- and space-sensitive social science datasets with EOD
+
+Supports inter- and transdisciplinary research
+
+  - Environmental social sciences
+  - Conflict and peace research
+  - Political attitudes and behavior
+  - Policy studies
+  - Economic development and inequality
+  - Public health
+:::
+
+::: {.column width="50%"}
+![](../img/gxc_v2.png){width="75%" fig-align="center"}
+:::
+::::
+
+## Installation
+
+The development version of the package is available on [GitHub](https://github.com/denabel/gxc). Please also refer to [our comprehensive online compendium](https://denabel.github.io/gxc_pages/).
+
+```{r}
+#| eval: false
+if(!require(remotes)){install.packages("remotes")}
+
+remotes::install_github("denabel/gxc")
+
+library(gxc)
+```
+
+## Workflow
+
+![](../img/path_stock_pic.png){.r-stretch fig-align="center"}
+
+
+
+
+## Upcoming Workshops / Events
+
+**Interactive Data Analysis with Shiny**
+
+- 03-04 July & 10-11 July 2025, Online; Lecturers: Jonas Lieth & Paul Bauer
+- [Register online](https://training.gesis.org/?site=pDetails&child=full&pID=0x30D69A7067E14C1190F57528682E1203)
+
+**Geodata and Spatial Regression Analysis**
+
+- 09-11 July 2025, GESIS Mannheim; Lecturer: Tobias Rüttenauer
+- [Register online](https://training.gesis.org/?site=pDetails&child=full&pID=0xC8DBE5AAA5FC4BE4ADDF1A90012B677E)
+
+**GESIS Workshop on Earth Observation Data in the Social Sciences**
+
+- November or December 2025, GESIS Cologne; Hosts: Dennis Abel & Stefan Jünger
+
+## The End {.center style="text-align: center;"}
+
+

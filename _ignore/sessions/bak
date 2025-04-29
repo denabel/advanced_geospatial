@@ -1,0 +1,157 @@
+
+
+```{r}
+issp_linked <-
+  dplyr::left_join(
+    issp |> 
+      dplyr::mutate(
+        country = ifelse(country == "USA", "United States of America", country)
+      ), 
+    world |> 
+      sf::st_drop_geometry() |> 
+      dplyr::select(country = admin, dplyr::contains("diff_")),
+    by = "country"
+  )
+
+issp_aggregated <-
+  issp |> 
+  dplyr::mutate(
+    country = ifelse(country == "USA", "United States of America", country)
+  ) |> 
+  dplyr::group_by(country) |> 
+  dplyr::mutate(concern = scale(concern)) |> 
+  dplyr::group_by(country, year) |> 
+  dplyr::summarize(concern = mean(concern, na.rm = TRUE))
+
+world_aggregated <-
+  world |> 
+  sf::st_drop_geometry() |> 
+  dplyr::select(country = admin, dplyr::contains("diff_")) |> 
+  tidyr::pivot_longer(
+    cols = dplyr::contains("diff_"),
+    values_to = "temp_diff",
+    names_to = "diff"
+  ) |> 
+  dplyr::mutate(year = rep(c(1993, 2000, 2010, 2020), 242)) |> 
+  dplyr::mutate(temp_diff = scale(temp_diff))
+
+
+issp_linked_long <-
+  dplyr::left_join(issp_aggregated, world_aggregated) |> 
+  # tidyr::pivot_longer(
+  #   cols = dplyr::contains("diff_"),
+  #   values_to = "temp_diff",
+  #   names_to = "diff"
+  # ) |> 
+  # dplyr::group_by(country) |> 
+  # dplyr::mutate(concern = scale(concern), temp_diff = scale(temp_diff)) |> 
+  tidyr::pivot_longer(
+    cols = c("concern", "temp_diff"),
+    names_to = "variable"
+  ) #|> 
+# dplyr::group_by(year, country, variable) |> 
+# dplyr::summarize(
+#   value = mean(value, na.rm = TRUE)
+# )
+
+issp_linked_long |> 
+  ggplot(aes(x = year, y = value, color = variable)) +
+  geom_line() +
+  facet_wrap(~country) +
+  scale_x_continuous(breaks = issp_linked_long$year) +
+  # scale_color_viridis_d(option = "magma") +
+  theme_bw()
+
+
+
+
+
+# dplyr::group_by(year) |> 
+# dplyr::summarize(
+#   cor = cor.test(concern, value)$estimate,
+#   p = cor.test(concern, value)$p.value
+# )
+
+tmp <-
+  issp_linked |> 
+  # tidyr::pivot_longer(
+  #   cols = dplyr::contains("diff_"),
+  #   names_to = "diff"
+  # ) |> 
+  # dplyr::group_by(year) |> 
+  dplyr::summarize(
+    cor = cor.test(concern, value)$estimate,
+    p = cor.test(concern, value)$p.value
+  )
+```
+
+## Aggregated climate concern
+
+Turning back to the survey data, we can aggregate climate change concern across country-waves and link it with the world vector file
+
+:::: columns
+::: {.column width="50%"}
+```{r}
+#| eval: false
+mean_concern <- 
+  issp |>
+  dplyr::group_by(country, year) |>
+  dplyr::summarize(
+    mean_concern = 
+      mean(concern, na.rm=TRUE),
+    se_concern = 
+      sd(concern, na.rm=TRUE) / sqrt(dplyr::n()),
+    .groups = "drop"
+  )
+
+mean_concern
+```
+:::
+
+::: {.column width="50%"}
+```{r}
+#| echo: false
+mean_concern <- 
+  issp |>
+  dplyr::group_by(country, year) |>
+  dplyr::summarize(
+    mean_concern = 
+      mean(concern, na.rm=TRUE),
+    se_concern = 
+      sd(concern, na.rm=TRUE) / sqrt(dplyr::n()),
+    .groups = "drop"
+  )
+
+mean_concern
+```
+:::
+::::
+
+
+
+
+```{r}
+ggplot(
+  mean_concern, 
+  aes(x = year, y = mean_concern, color = country, group = country)
+) +
+  geom_line() +
+  scale_x_continuous(breaks = mean_concern$year) +
+  facet_wrap(~country, ncol = 5)
+
+geom_point(size = 3) +
+  geom_errorbar(
+    aes(ymin = mean_concern - se_concern, ymax = mean_concern + se_concern), 
+    width = .5
+  ) +
+  geom_line()+
+  labs(
+    title = "Mean climate change concern across countries",
+    x = "Survey Wave", 
+    y = "Mean climate change concern", 
+    color = "Country") +
+  facet_wrap(~country, ncol=5)+
+  theme_minimal() +
+  theme(legend.position = "none")
+```
+

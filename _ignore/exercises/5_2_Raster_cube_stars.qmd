@@ -1,0 +1,146 @@
+---
+title: "Exercise 5_2: Raster cube with stars"
+subtitle: 'Advanced Geospatial Data Processing for Social Scientists'
+author: Dennis Abel & Stefan Jünger
+format: 
+  html:
+    embed-resources: true
+    code-copy: true
+execute:
+  echo: true
+editor: visual
+callout-icon: false
+callout-appearance: minimal
+---
+
+### Exercises
+
+We are deliberately boring in this exercise - we want to do exactly the same as before - this time with `stars`. Our aim is to create a raster cube (`stars`) for Texas population data between 2017 and 2020.
+
+::: callout-note
+## `r emo::ji("weight_lifting_man")` Exercise 1
+
+Load the four population raster layers for Texas 2017-2020 (`./data/US-TX_ppp_2017_1km.tif`-`./data/US-TX_ppp_2020_1km.tif`) with `stars::read_stars()` and integrate these into one raster cube. First, create a file list for all four raster layers. Second, prepare a vector which stores the four years. Finally, you can read in the file list along the list of years.
+:::
+
+::: callout-note
+## `r emo::ji("weight_lifting_man")` Exercise 2
+
+Adjust the attribute name (`names()`) to a meaningful string for your variable.
+:::
+
+::: callout-note
+## `r emo::ji("weight_lifting_man")` Exercise 3
+
+Again, let's reproject our Texas data to EPSG:3081. Inspect the object afterwards (`print()`).
+:::
+
+::: callout-note
+## `r emo::ji("weight_lifting_man")` Exercise 4
+
+Visualize all four years with a spatial window of `x = 0:1000` and `y = 0:1000`. You can input your `stars` object into base `R` `plot()` command. The default color scale is often insufficient. Specify the argument `breaks = "equal"` to improve readability.
+:::
+
+::: callout-note
+## `r emo::ji("weight_lifting_man")` Exercise 5
+
+Store your `stars` object as `.rds` file on disk (`saveRDS`).
+:::
+
+### Solutions
+
+::: {.callout-tip collapse="true"}
+## `r emo::ji("white_check_mark")` Solution 1
+
+```{r}
+#| eval: false
+library(dplyr)
+library(stars)
+
+# Load the raster data
+files <- list.files("./data", pattern = "US-TX_ppp_20(17|18|19|20)_1km\\.tif$", full.names = TRUE)
+
+# Vector of years
+dates <- 2017:2020
+
+# Read layers along time dimension
+TX_pop_cube <- read_stars(files, along = list(time = dates))
+
+print(TX_pop_cube)
+```
+
+```{r}
+#| echo: false
+library(dplyr)
+library(stars)
+
+# Load the raster data
+files <- list.files("../../data", pattern = "US-TX_ppp_20(17|18|19|20)_1km\\.tif$", full.names = TRUE)
+
+# Vector of years
+dates <- 2017:2020
+
+# Read layers along time dimension
+TX_pop_cube <- read_stars(files, along = list(time = dates))
+
+print(TX_pop_cube)
+```
+:::
+
+::: {.callout-tip collapse="true"}
+## `r emo::ji("white_check_mark")` Solution 2
+
+```{r}
+names(TX_pop_cube) <- "population"
+
+st_dimensions(TX_pop_cube)
+
+print(TX_pop_cube)
+```
+:::
+
+::: {.callout-tip collapse="true"}
+## `r emo::ji("white_check_mark")` Solution 3
+
+```{r}
+grid <- st_bbox(TX_pop_cube) |>
+  st_as_sfc() |>
+  st_transform(crs = 3081) |>
+  st_bbox() |>
+  st_as_stars(nx = dim(TX_pop_cube)["x"], 
+              ny = dim(TX_pop_cube)["y"])
+
+TX_pop_cube <- st_warp(TX_pop_cube, grid)
+
+print(TX_pop_cube)
+```
+:::
+
+::: {.callout-tip collapse="true"}
+## `r emo::ji("white_check_mark")` Solution 4
+
+```{r}
+# Plot a single layer
+plot(TX_pop_cube[1,
+                 0:1000,
+                 0:1000, 
+                 1:4],
+     breaks = "equal")
+```
+:::
+
+::: {.callout-tip collapse="true"}
+## `r emo::ji("white_check_mark")` Solution 5
+
+```{r}
+#| eval: false
+# Export
+saveRDS(TX_pop_cube, "./data/TX_pop_cube.rds")
+```
+
+```{r}
+#| echo: false
+# Export
+saveRDS(TX_pop_cube, "../../data/TX_pop_cube.rds")
+```
+:::

@@ -1,0 +1,581 @@
+---
+title: "(Vector and) Raster Data in R"
+subtitle: "Advanced Geospatial Data Processing for Social Scientists"
+author: "Dennis Abel & Stefan Jünger"
+date: April 28, 2025
+execute:
+  echo: true
+format:
+  revealjs:
+    embed-resources: true
+    theme: [simple, tweaks.css]
+    smaller: true
+    scrollable: true
+    slide-number: "c/t"
+    logo: ../img/GESIS-Logo_2024.svg.png
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r}
+#| include: false
+library(dplyr)
+library(sf)
+library(terra)
+library(tmap)
+```
+
+
+```{r}
+#| echo: false
+source("course_content.R") 
+
+course_content |> 
+  kableExtra::row_spec(3, background = "yellow")
+```
+
+## Refresher: geospatial data and their implementation in `R` {.center style="text-align: center;"}
+
+## Why care about data types and formats?
+
+There are differences in how spatial information is stored, processed, and visually represented.
+
+- Different commands for data import and manipulation
+- Spatial linking techniques and analyses partly determined by data format
+- Visualization of data can vary
+
+So, always know what kind of data you are dealing with!
+
+## Vector and raster data
+
+![](../img/fig_geometries.png){.r-stretch fig-align="center"}
+
+<small>Sources: OpenStreetMap / GEOFABRIK (2018), City of Cologne (2014), and the Statistical Offices of the Federation and the Länder (2016) / Jünger, 2019</small>
+
+## Vector data {.center style="text-align: center;"}
+
+## Representing the world in vectors
+
+:::: columns
+::: {.column width="50%"}
+```{r}
+#| echo: false
+#| out.width: "120%"
+library(tmap)
+data(World, metro)
+
+tm_shape(World) +
+  tm_borders()+
+  tm_shape(metro) +
+  tm_dots()
+```
+:::
+
+::: {.column width="50%"}
+The surface of the earth is represented by simple geometries and attributes.
+
+Each object is defined by longitude (x) and latitude (y) values.
+
+It could also include z coordinates...
+:::
+::::
+
+## Vector data: geometries
+
+:::: columns
+::: {.column width="50%"}
+Every real-world feature is one of three types of geometry:
+
+- Points: discrete location (e.g., a tree)
+- Lines: linear feature (e.g., a river)
+- Polygons: enclosed areas (e.g., a city, country, administrative boundaries)
+:::
+
+::: {.column width="50%"}
+![](../img/vector_geometries.png){fig-align="center" width="75%"}
+<small>National Ecological Observatory Network (NEON), cited by [Datacarpentry](https://datacarpentry.org/organization-geospatial/instructor/02-intro-vector-data.html)</small>
+
+:::
+::::
+
+## Vector data: attribute tables
+
+Only geometries means that we do not have any other information.
+
+We must assign attributes to each geometry to hold additional information $\rightarrow$ data tables called attribute tables.
+
+- Each row represents a geometric object, which we can also call observation, feature, or case
+- Each column holds an attribute or, in 'our' language, a variable
+
+## Vector data: attribute tables
+
+![](../img/attr_table.png){.r-stretch fig-align="center"}
+
+## File formats/extensions
+
+- GeoPackage `.gpkg`
+- Shapefile `.shp`
+- GeoJSON `.geojson`
+- ...
+- Sometimes, vector data come even in a text format, such as `CSV`
+
+## Welcome to `simple features`
+
+:::: columns
+::: {.column width="50%"}
+Several packages are out there to wrangle and visualize spatial and, especially, vector data within `R`. We will use the `sf` package ("simple features").
+
+<br>
+Why? 
+
+`simple features` refers to a formal standard representing spatial geometries and supports interfaces to other programming languages and GIS systems (ISO 19125-1).
+:::
+
+::: {.column width="50%"}
+
+![](../img/sf.jpg){fig-align="center"}
+
+<p style="text-align: right;"><small>Illustration by [Allison Horst](https://allisonhorst.com/r-packages-functions)</small></p>
+:::
+::::
+
+## Load a vector data file
+
+The first step is, of course, loading the data. We want to import the `.geojson` file for the administrative borders of the whole world called `World_Countries.geojson`.
+
+```{r}
+#| include: false
+# load library
+library(sf)
+
+# load data
+# source: https://hub.arcgis.com/datasets/esri::world-countries-generalized/
+hello_world <- sf::read_sf("../../data/World_Countries.geojson")
+```
+
+```{r}
+#| eval: false
+# load library
+library(sf)
+
+# load data
+# source: https://hub.arcgis.com/datasets/esri::world-countries-generalized/
+hello_world <- sf::read_sf("./data/World_Countries.geojson")
+```
+
+## What is this thing?
+
+```{r}
+hello_world
+```
+
+## We can already plot it
+
+```{r}
+plot(sf::st_geometry(hello_world))
+```
+
+## This is the bounding box
+
+```{r}
+#| echo: false
+plot(sf::st_geometry(hello_world))
+sf::st_bbox(hello_world) |> 
+  sf::st_as_sfc(crs = sf::st_crs(hello_world)) |> 
+  plot(add = TRUE)
+```
+
+## Inspect your data: classics
+
+There are no huge differences between the file we just imported and a regular data table.
+
+```{r}
+# head of data table
+head(hello_world, 2)
+```
+
+## Inspect your data: spatial features
+
+Besides our general data inspection, we may also want to check the spatial features of our import. This check includes the geometric type (points? lines? polygons?) and the coordinate reference system.
+
+```{r}
+# type of geometry
+sf::st_geometry(hello_world) 
+```
+
+## Inspect your data: spatial features
+
+Each polygon is defined by several connected points to build an enclosed area. Several polygons in one data frame have the `sf` type `multipolygons`. Just as the world consists of several states, the polygon of the world consists of several smaller polygons.
+
+```{r}
+# extract the simple features column and further inspecting 
+attr(hello_world, "sf_column") |> 
+  dplyr::pull(hello_world, var = _) |> 
+  dplyr::glimpse()
+```
+
+## Inspect your data: spatial features
+
+Remember: The Coordinate Reference System is critical. A crucial step is to check the CRS of your geospatial data.
+
+```{r}
+# coordinate reference system
+sf::st_crs(hello_world) 
+```
+
+## Spatial joins
+
+Often, we want to combine geospatial datasets from different sources. The choice of an appropriate method depends, once again, on the data format. In the world of vector data, we usually speak of "spatial joins" when linking two vector datasets. Let's pull in more spatially narrowed data.
+
+:::: columns
+::: {.column width="50%"}
+```{r}
+#| eval: false
+german_districts <- 
+  sf::st_read(
+    "./data/VG250_KRS.shp", 
+    as_tibble = TRUE
+  )
+
+plot(german_districts["AGS"])
+```
+
+```{r}
+#| message: false
+#| warning: false
+#| include: false
+german_districts <- 
+  sf::st_read(
+    "../../data/VG250_KRS.shp", 
+    as_tibble = TRUE
+  )
+
+plot(german_districts["AGS"])
+```
+:::
+
+::: {.column width="50%"}
+```{r}
+#| echo: false
+#| fig-asp: .7
+plot(german_districts["AGS"])
+```
+:::
+::::
+
+## Spatial joins
+
+Using the synthetic survey geocoordinates, we can craft a toy example to demonstrate spatial joins. This is how they look.
+
+:::: columns
+::: {.column width="50%"}
+```{r}
+#| eval: false
+points <- 
+  readRDS(
+    "./data/synthetic_survey_coordinates.rds"
+  ) |> 
+  sf::st_transform(sf::st_crs(german_districts))
+
+plot(sf::st_geometry(points))
+```
+:::
+
+::: {.column width="50%"}
+```{r}
+#| echo: false
+#| fig-asp: .9
+points <- 
+  readRDS(
+    "../../data/synthetic_survey_coordinates.rds"
+  ) |> 
+  sf::st_transform(sf::st_crs(german_districts))
+
+plot(sf::st_geometry(points))
+```
+:::
+::::
+
+
+## Spatial joins
+
+It would be nice if we had regional identifiers in our points data, but there aren't any. This issue shows where spatial joins come in handy. We can use `sf::st_join()` to extract this information.
+
+```{r}
+points_ags <-  sf::st_join(points, german_districts["AGS"])
+
+points_ags
+```
+
+## There's more
+
+In this course, we only use a subset of the options for spatial joins in `sf`. Please refer to the official [sf cheat sheet](https://rstudio.github.io/cheatsheets/sf.pdf).
+
+![](../img/sf_cheatsheet.jpg){.r-stretch fig-align="center"}
+
+## Finally: Transforming the CRS
+
+We have to change our CRS fairly often depending on our data sources. That's easily doable in `sf` using the `sf::st_transform()`. Here's a closer look.
+
+```{r}
+sf::st_crs(german_districts)$epsg
+```
+
+Let's pretend we want to use the EPSG code `4326`--no problem!
+
+```{r}
+german_districts_4326 <-  sf::st_transform(german_districts, 4326)
+
+sf::st_crs(german_districts_4326)$epsg
+```
+
+## Exercise 2_1: Vector Data Refresher
+
+![](../img/cat_quality.webp){width="45%" fig-align="center"}
+
+## Raster data {.center style="text-align: center;"}
+
+## Difference to vector data
+
+Data Structure:
+
+- Other data format(s), different file extensions
+- Geometries do not differ within one dataset
+
+Implications:
+
+- Other geospatial operations possible
+
+Benefits:
+
+- Can be way more efficient and straightforward to process
+- It's like working with simple tabular data
+
+## Visual difference between vector and raster data
+
+![](../img/fig_geometries.png){.r-stretch fig-align="center"}
+
+
+## What exactly are raster data?
+
+- Hold information on (most of the time) evenly shaped grid cells
+- Basically, a simple data table
+- Each cell represents one observation
+
+![](../img/table_to_raster.png){.r-stretch fig-align="center"}
+
+## Metadata
+
+- Information about geometries is globally stored
+- They are the same for all observations
+- Their location in space is defined by their cell location in the data table
+- Without this information, raster data were simple image files
+
+## Important metadata
+
+**Raster Dimensions**: number of columns, rows, and cells
+
+**Extent**: similar to bounding box in vector data
+
+**Resolution**: the size of each raster cell
+
+**Coordinate reference system**: defines where on the earth's surface the raster layer lies
+
+## Setting up a raster dataset is easy
+
+```{r}
+input_data <- matrix(sample(1:100, 16), nrow = 4)
+
+raster_layer <- terra::rast(input_data)
+
+raster_layer
+```
+
+## We can already plot it
+
+```{r}
+terra::plot(raster_layer)
+```
+
+## File formats/extensions
+
+- GeoTIFF `tif`
+- Gridded data `.grd`
+- Network common data format `.nc`
+- Esri grid `.asc`
+- ...
+- Sometimes, raster data come even in a text format, such as `CSV`
+
+## Implementations in `R`
+
+`terra` is the most commonly used package for raster data in `R`.
+
+Some other developments, e.g., in the `stars` package, also implement an interface to simple features in `sf`. We will work with `stars` later in this course.
+
+The `terra` package helps to employ zonal statistics. But the `spatstat` package is even more elaborated.
+
+## Loading raster tiffs (German Census Data 2022)
+
+Loading raster data in `terra` is straightforward. For this purpose, we use the function `terra::rast()`.
+
+```{r}
+#| eval: false
+pop_grid_ger_2022 <- terra::rast("./data/z22/population.tif")
+
+pop_grid_ger_2022
+```
+
+```{r}
+#| echo: false
+pop_grid_ger_2022 <- terra::rast("../../data/z22/population.tif")
+
+pop_grid_ger_2022
+```
+
+## Loading raster tiffs (German Census Data 2022)
+
+Let's load another dataset to compare structures because that's really easy in `terra`.
+
+```{r}
+#| eval: false
+age_under_18_grid_2022 <- terra::rast("./data/z22/age_under_18.tif")
+
+age_under_18_grid_2022
+```
+
+```{r}
+#| echo: false
+age_under_18_grid_2022 <- terra::rast("../../data/z22/age_under_18.tif")
+
+age_under_18_grid_2022
+```
+
+## Compare layers by plotting
+
+:::: columns
+::: {.column width="50%"}
+```{r}
+#| fig.asp: .7
+terra::plot(
+  pop_grid_ger_2022
+)
+```
+:::
+
+::: {.column width="50%"}
+```{r}
+#| fig.asp: .7
+terra::plot(
+  age_under_18_grid_2022
+)
+```
+:::
+::::
+
+## Simple statistics
+
+Working with raster data is straightforward
+
+- quite speedy
+- yet not as comfortable as working with `sf` objects
+
+For example, to calculate the mean, we can use the following:
+
+```{r}
+terra::global(pop_grid_ger_2022, fun = "mean", na.rm = TRUE)
+```
+
+
+## Get all values as a vector
+
+We can also extract the values of a raster directly as a vector:
+
+```{r}
+all_raster_values <- terra::values(pop_grid_ger_2022)
+
+mean(all_raster_values, na.rm = TRUE)
+```
+
+Nevertheless, although raster data are simple data tables, working with them is a bit different compared to, e.g., simple features.
+
+## Combining raster layers to calculate new values
+
+:::: columns
+::: {.column width="50%"}
+```{r}
+young_people <- 
+  pop_grid_ger_2022 * 
+  (age_under_18_grid_2022 / 100)
+
+young_people
+```
+:::
+
+::: {.column width="50%"}
+```{r}
+#| echo: false
+#| fig.asp: .8
+terra::plot(young_people)
+```
+:::
+::::
+
+## Loading raster data with `stars`
+
+Later, we will work with multidimensional raster data cubes. While it is possible to work them in `terra`, `stars` is way more elaborated (we'll discuss it tomorrow in more detail). So, here is an example of how to load raster data into `stars`.
+
+```{r}
+#| eval: false
+pop_grid_ger_2022_stars <- 
+  stars::read_stars("./data/z22/population.tif")
+
+pop_grid_ger_2022_stars
+```
+
+```{r}
+#| echo: false
+pop_grid_ger_2022_stars <- 
+  stars::read_stars("../../data/z22/population.tif")
+
+pop_grid_ger_2022_stars
+```
+
+## `stars` objects can also be plotted
+
+:::: columns
+::: {.column width="50%"}
+```{r}
+#| eval: false
+#| fig.asp: 1
+plot(pop_grid_ger_2022_stars)
+```
+:::
+
+::: {.column width="50%"}
+```{r}
+#| echo: false
+#| fig.asp: 1
+plot(pop_grid_ger_2022_stars)
+```
+:::
+::::
+
+## Finally: Transforming the CRS
+
+As mentioned before, we may also have to change the CRS of our raster data. Returning to `terra`, this is not called 'transforming' but 'projecting' (which makes sense, right?).
+
+```{r}
+terra::crs(pop_grid_ger_2022, describe = TRUE)$code
+```
+
+Let's pretend we want to use the EPSG code `3035`--no problem!
+
+```{r}
+pop_grid_ger_2022_3035 <- terra::project(pop_grid_ger_2022, "EPSG:3035")
+
+terra::crs(pop_grid_ger_2022_3035, describe = TRUE)$code
+```
+
+## Exercise 2_2: Basic Raster Operations
+
+![](../img/cat_quality.webp){width="45%" fig-align="center"}
