@@ -79,7 +79,7 @@ We want to investigate whether temperature anomalies in the year of the survey, 
 
 1. *Indicator*: Temperature - annual average
 2. *Intensity*: Anomaly (mean deviation)
-3. *Focal time period*: 2020
+3. *Focal time period*: 1993, 2000, 2010, 2020
 4. *Baseline period*: 1961-1990
 5. *Spatial buffer*: Country
 
